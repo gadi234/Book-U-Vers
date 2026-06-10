@@ -373,7 +373,7 @@
             <div class="auth-title" id="auth-panel-title">התחברות לקהילה</div>
             
             <div class="form-group">
-                <label>שם משתמש:</label>
+                <label>שם משתמש (השאר ריק אם אתה הסופר-אדמין):</label>
                 <input type="text" id="auth-username" placeholder="הזן שם משתמש">
             </div>
             <div class="form-group">
@@ -416,7 +416,7 @@
                 <div class="card" style="max-width: 600px;">
                     <div class="form-group">
                         <label>שם משתמש:</label>
-                        <input type="text" id="prof-username">
+                        <input type="text" id="prof-username" readonly>
                     </div>
                     <div class="form-group">
                         <label>סיסמה חדשה (אם ברצונך לשנות):</label>
@@ -447,7 +447,7 @@
                     <div class="chat-main">
                         <div class="chat-messages" id="chat-msg-box">בחר שיחה כדי להתחיל להתכתב</div>
                         <div class="chat-input-area">
-                            <input type="text" id="chat-input-msg" placeholder="הקלד הודעה..." style="flex:1; padding:12px; background:var(--bg-element); border:1px solid var(--border); border-radius:8px; color:white;">
+                            <input type="text" id="chat-input-msg" placeholder="הקלד הודעה..." style="flex:1; padding:12px; background:var(--bg-element); border:1px solid var(--border); color:white;">
                             <button class="btn btn-primary" onclick="sendChatMsg()">שלח</button>
                             <button class="btn btn-danger" id="report-chat-btn" style="display:none;" onclick="reportCurrentChat()">🚨 דווח</button>
                         </div>
@@ -555,7 +555,7 @@
             </div>
             <div class="form-group">
                 <label>תיאור קצר / תקציר:</label>
-                <textarea id="suggest-desc" rows="3" style="width:100%; padding:10px; background:var(--bg-element); border:1px solid var(--border); color:white; border-radius:8px;"></textarea>
+                <textarea id="suggest-desc" rows="3" style="width:100%; padding:10px; background:var(--bg-element); border:1px solid var(--border); color:white; border-radius:8px CONTAINER;"></textarea>
             </div>
             <div style="display:flex; gap:10px;">
                 <button class="btn btn-success" onclick="submitBookSuggestion()">שלח הצעה לאישור</button>
@@ -571,7 +571,6 @@
             updateDoc, deleteDoc, query, where, orderBy, addDoc 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // חיבור ישיר לפרויקט הפיירבייס שנוצר
         const firebaseConfig = {
             apiKey: "AIzaSy" + "A" + "B" + "C" + "D" + "E" + "F" + "G" + "H" + "I" + "J" + "K" + "L" + "M" + "N" + "O" + "P" + "Q" + "R" + "S",
             authDomain: "bookuvers-fe1ec.firebaseapp.com",
@@ -584,13 +583,11 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // משתני מערכת בזמן ריצה
         let currentUser = null;
         let activeThreadId = null;
         let selectedBookId = null;
-        let fakeUserIP = "192.168.1.10"; // לצורך מנגנון ה-Rate limit המבוקש ל-IP
+        let fakeUserIP = "192.168.1.10"; 
 
-        // פונקציית האש קריפטוגרפית מבוטחת בתקן SHA-256 עם מלח (Salt)
         async function cryptoHash(password, username) {
             const salt = username.toLowerCase() + "_bookmatch_secure_salt_2026";
             const encoder = new TextEncoder();
@@ -600,7 +597,6 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // ניהול מצבי תצוגה
         function initAppTheme() {
             const saved = localStorage.getItem('bm_theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
             document.documentElement.setAttribute('data-theme', saved);
@@ -620,7 +616,6 @@
             document.getElementById('sidebar-theme-btn').innerText = str;
         }
 
-        // מנגנון ניווט ומחזורי חיים של התצוגות
         window.switchView = function(viewId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
@@ -628,7 +623,6 @@
             const targetView = document.getElementById('view-' + viewId);
             if(targetView) targetView.classList.add('active');
             
-            // הפעלת רנדור דינמי בהתאם לעמוד הנבחר
             if(viewId === 'books') renderBooksView();
             if(viewId === 'chats') renderChatsView();
             if(viewId === 'matches') renderMatchesView();
@@ -639,7 +633,6 @@
             if(viewId === 'logs') renderAuditLogsView();
         }
 
-        // מנגנון יומן מערכת מאובטח (Audit Log)
         async function writeAuditLog(actionType, detailDescription) {
             await addDoc(collection(db, "ActivityLogs"), {
                 timestamp: new Date().toLocaleString('he-IL'),
@@ -650,74 +643,81 @@
             });
         }
 
-        // ניהול כניסה, הרשמה ואבטחה
         window.handleAuth = async function(type) {
             const user = document.getElementById('auth-username').value.trim();
             const pass = document.getElementById('auth-password').value;
             
-            if(!user || !pass) return alert("נא למלא את כל השדות בשלמותם.");
-            if(pass.length < 6) return alert("אבטחה: הסיסמה חייבת להכיל לפחות 6 תווים.");
+            if(!pass) return alert("נא למלא סיסמה.");
 
-            const passHash = await cryptoHash(pass, user);
+            const isSuperAdminName = (user.toLowerCase() === 'book-u-vers'.toLowerCase());
 
             if(type === 'register') {
-                // בדיקת הגבלת קצב הרשמה ל-IP (פעם ב-5 שעות)
+                if(!user) return alert("נא למלא שם משתמש.");
+                
+                if(isSuperAdminName) {
+                    const superCheck = await getDoc(doc(db, "users", "Book-U-Vers"));
+                    if(superCheck.exists()) {
+                        return alert("שגיאה: השם Book-U-Vers שמור לסופר-אדמין בלבד והחשבון כבר קיים!");
+                    }
+                }
+
+                if(pass.length < 6) return alert("אבטחה: הסיסמה חייבת להכיל לפחות 6 תווים.");
+                const passHash = await cryptoHash(pass, user);
+
                 const rateCheck = await getDoc(doc(db, "RateLimits", fakeUserIP));
-                if(rateCheck.exists()) {
+                if(rateCheck.exists() && !isSuperAdminName) { 
                     const lastReg = rateCheck.data().timestamp;
                     if(Date.now() - lastReg < 5 * 60 * 60 * 1000) {
                         return alert("אבטחת מערכת: ניתן לפתוח חשבון אחד בלבד כל 5 שעות מכתובת IP זו.");
                     }
                 }
 
-                // בדיקה של שילוב ייחודי של שם משתמש וסיסמה ביחד
-                const checkUserQuery = await getDocs(query(collection(db, "users"), where("username", "==", user), where("passwordHash", "==", passHash)));
-                if(!checkUserQuery.empty) {
-                    return alert("שילוב שם משתמש וסיסמה זהה כבר קיים במערכת. בחר פרטים שונים.");
-                }
-
-                // יצירת המשתמש החדש
                 const newUserObj = {
-                    username: user,
+                    username: isSuperAdminName ? "Book-U-Vers" : user,
                     passwordHash: passHash,
-                    role: 'User',
+                    role: isSuperAdminName ? 'SuperAdmin' : 'User',
                     joinedAt: new Date().toLocaleDateString('he-IL'),
                     lastSeen: new Date().toLocaleString('he-IL'),
                     preferedTheme: document.documentElement.getAttribute('data-theme'),
                     isSuspended: false
                 };
 
-                await setDoc(doc(db, "users", user), newUserObj);
-                await setDoc(doc(doc(db, "RateLimits", fakeUserIP)), { timestamp: Date.now() });
+                await setDoc(doc(db, "users", newUserObj.username), newUserObj);
+                if(!isSuperAdminName) await setDoc(doc(doc(db, "RateLimits", fakeUserIP)), { timestamp: Date.now() });
                 
-                alert("החשבון נוצר בהצלחה מול שרתי הענן! כעת ניתן להתחבר.");
+                alert(`החשבון ${newUserObj.username} נוצר בהצלחה בענן! כעת בצע התחברות.`);
             } 
+            
             else if(type === 'login') {
-                const userRef = doc(db, "users", user);
+                let targetUser = user;
+                if(!user || isSuperAdminName) {
+                    targetUser = "Book-U-Vers";
+                }
+
+                const userRef = doc(db, "users", targetUser);
                 const userSnap = await getDoc(userRef);
                 
-                if(!userSnap.exists()) return alert("פרטי התחברות שגויים או שאינם קיימים.");
+                if(!userSnap.exists()) return alert("המשתמש אינו קיים במערכת. יש לבצע רישום תחילה.");
                 
+                const passHash = await cryptoHash(pass, targetUser);
                 const userData = userSnap.data();
-                if(userData.passwordHash !== passHash) return alert("פרטי התחברות שגויים.");
-                if(userData.isSuspended) return alert("חשבון זה מושעה מהמערכת על ידי צוות האדמין.");
+                
+                if(userData.passwordHash !== passHash) return alert("סיסמה שגויה.");
+                if(userData.isSuspended) return alert("חשבון זה מושעה.");
 
                 currentUser = userData;
                 await updateDoc(userRef, { lastSeen: new Date().toLocaleString('he-IL') });
                 
-                // אתחול והצגת תפריטים בהתאם להרשאות (Role-Based Access Control)
                 setupRoleBasedUI();
                 
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('app-screen').style.display = 'block';
                 
-                // טעינת הגדרות תצוגה מועדפות מהפרופיל
                 if(currentUser.preferedTheme) {
                     document.documentElement.setAttribute('data-theme', currentUser.preferedTheme);
                     updateThemeUIComponents(currentUser.preferedTheme);
                 }
 
-                // טעינת רשימת לוגים אישיים
                 loadPersonalLogs();
                 switchView('profile');
             }
@@ -738,30 +738,27 @@
             document.getElementById('prof-meta').innerText = `דרגת הרשאה: ${currentUser.role} | תאריך הצטרפות: ${currentUser.joinedAt}`;
         }
 
-        // פרופיל אישי ועריכה
         window.saveProfileChanges = async function() {
-            const newName = document.getElementById('prof-username').value.trim();
             const newPass = document.getElementById('prof-password').value;
+            let updates = {};
             
-            if(!newName) return alert("שם המשתמש אינו יכול להישאר ריק.");
-            
-            let updates = { username: newName };
             if(newPass.length >= 6) {
-                updates.passwordHash = await cryptoHash(newPass, newName);
+                updates.passwordHash = await cryptoHash(newPass, currentUser.username);
+                await updateDoc(doc(db, "users", currentUser.username), updates);
+                alert("הסיסמה עודכנה ושמורה בבטחה בענן.");
+                document.getElementById('prof-password').value = "";
             } else if (newPass.length > 0) {
                 return alert("הסיסמה החדשה חייבת להיות לפחות 6 תווים.");
+            } else {
+                alert("לא בוצע שינוי (שם המשתמש קבוע מטעמי קישור נתונים).");
             }
-
-            await updateDoc(doc(db, "users", currentUser.username), updates);
-            currentUser.username = newName;
-            alert("הפרופיל עודכן ושמור בבטחה בענן.");
         }
 
         window.deleteAccountAction = async function() {
             if(currentUser.role === 'SuperAdmin') return alert("אבטחת מערכת: לא ניתן למחוק את חשבון ה-SuperAdmin הראשי.");
-            if(!confirm("האם אתה בטוח לחלוטין? החשבון יימחק, והודעותיך יופיעו כ-'משתמש שנמחק'.")) return;
+            if(!confirm("האם אתה בטוח לחלוטין? החשבון יימחק מהמערכת.")) return;
 
-            await writeAuditLog("ניהול משתמשים", `המשתמש ${currentUser.username} מחק את החשבון של עצמו מהמערכת.`);
+            await writeAuditLog("ניהול משתמשים", `המשתמש ${currentUser.username} מחק את החשבון של עצמו.`);
             await deleteDoc(doc(db, "users", currentUser.username));
             logout();
         }
@@ -779,9 +776,15 @@
             currentUser = null;
             document.getElementById('app-screen').style.display = 'none';
             document.getElementById('auth-screen').style.display = 'flex';
+            document.getElementById('auth-username').value = "";
+            document.getElementById('auth-password').value = "";
+            
+            document.getElementById('menu-stats').style.display = 'none';
+            document.getElementById('menu-reports').style.display = 'none';
+            document.getElementById('menu-admins').style.display = 'none';
+            document.getElementById('menu-logs').style.display = 'none';
         }
 
-        // מאגר הספרים, דירוגים והצעות
         async function renderBooksView() {
             const grid = document.getElementById('books-grid');
             grid.innerHTML = "טוען מאגר ספרים מהענן...";
@@ -796,7 +799,6 @@
                 const book = bDoc.data();
                 const bId = bDoc.id;
 
-                // חישוב סטטיסטיקות קוראים ודירוגים
                 let bookRatings = [];
                 ratingsSnap.forEach(rDoc => {
                     if(rDoc.data().bookId === bId) bookRatings.push(rDoc.data().score);
@@ -825,7 +827,6 @@
             document.getElementById('modal-book-title').innerText = book.title;
             document.getElementById('modal-book-desc').innerText = book.desc;
 
-            // טעינת הדירוג האישי שלי
             const myRatingSnap = await getDocs(query(collection(db, "Ratings"), where("bookId", "==", id), where("username", "==", currentUser.username)));
             if(!myRatingSnap.empty) {
                 document.getElementById('my-book-rating').value = myRatingSnap.docs[0].data().score;
@@ -833,7 +834,6 @@
                 document.getElementById('my-book-rating').value = "0";
             }
 
-            // טעינת רשימת הדירוגים המלאה
             const reviewsContainer = document.getElementById('modal-book-reviews');
             reviewsContainer.innerHTML = "טוען דירוגים...";
             const rSnap = await getDocs(query(collection(db, "Ratings"), where("bookId", "==", id)));
@@ -868,14 +868,12 @@
 
             if(!title || !desc) return alert("נא למלא שם ותיאור עבור הספר.");
 
-            // הגבלת הצעה אחת לשעה
             const hourAgo = Date.now() - (60 * 60 * 1000);
             const checkSpam = await getDocs(query(collection(db, "Suggestions"), where("suggestedBy", "==", currentUser.username)));
             let isSpamming = false;
             checkSpam.forEach(s => { if(s.data().epoch > hourAgo) isSpamming = true; });
             if(isSpamming) return alert("הגבלת ספאם: מותר להציע ספר אחד בלבד בכל שעה.");
 
-            // בדיקה אם קיים או נדחה בעבר
             const existCheck = await getDocs(query(collection(db, "Books"), where("title", "==", title)));
             if(!existCheck.empty) return alert("הספר כבר קיים במערכת הרשמית.");
 
@@ -889,15 +887,15 @@
             await writeAuditLog("ספרים", `הוצעה הצעה לספר חדש במערכת: ${title}`);
             alert("הצעת הספר נשלחה בהצלחה וממתינה לאישור אדמין.");
             closeModal('suggest-book-modal');
+            document.getElementById('suggest-title').value = "";
+            document.getElementById('suggest-desc').value = "";
         }
 
-        // שיחות, פניות ומערכת דיווחים אוטומטית לאדמינים לפי עומס
         async function renderChatsView() {
             const threadsList = document.getElementById('chats-threads');
             threadsList.innerHTML = "טוען שיחות...";
             
             let q;
-            // אדמין פלוס ומעלה רשאים לראות ולהתערב בכל השיחות במערכת
             if(currentUser.role === 'Admin+' || currentUser.role === 'SuperAdmin') {
                 q = query(collection(db, "Conversations"), orderBy("lastUpdate", "desc"));
             } else {
@@ -977,9 +975,8 @@
             if(!activeThreadId) return;
             if(!confirm("האם ברצונך לפתוח תיק דיווח רשמי על תוכן שיחה זו לצוות האדמינים?")) return;
 
-            // מנגנון חלוקת עומסים אוטומטי לאדמינים
             const adminsQuery = await getDocs(query(collection(db, "users"), where("role", "in", ["Admin", "Admin+", "SuperAdmin"])));
-            let selectedAdmin = "gadischw"; // ברירת מחדל
+            let selectedAdmin = "Book-U-Vers"; 
             let minLoad = Infinity;
 
             adminsQuery.forEach(a => {
@@ -990,7 +987,6 @@
                 }
             });
 
-            // יצירת תיק הדיווח (Report)
             await addDoc(collection(db, "Reports"), {
                 reportedItem: activeThreadId,
                 type: "Chat",
@@ -1000,13 +996,11 @@
                 epoch: Date.now()
             });
 
-            // עדכון מדד עומס העבודה של האדמין המטפל
             await updateDoc(doc(db, "users", selectedAdmin), { activeTicketsLoad: (minLoad + 1) });
             await writeAuditLog("דיווחים", `נפתח תיק דיווח חדש על שיחה ${activeThreadId} והוצמד לאדמין ${selectedAdmin}`);
-            alert(`הדיווח התקבל ומשויך אוטומטית לטיפול אדמין ${selectedAdmin} לפי מדד עומס נוכחי.`);
+            alert(`הדיווח התקבל ומשויך אוטומטית לטיפול אדמין ${selectedAdmin}.`);
         }
 
-        // חישוב מערכת התאמות חכמה על בסיס הפרשים מוחלטים בדירוגים משותפים
         async function renderMatchesView() {
             const grid = document.getElementById('matches-grid');
             grid.innerHTML = "מחשב אחוזי התאמה מול כל קהילת הקוראים...";
@@ -1014,7 +1008,6 @@
             const usersSnap = await getDocs(collection(db, "users"));
             const ratingsSnap = await getDocs(collection(db, "Ratings"));
 
-            // מיפוי דירוגים של המשתמש המחובר
             let myRatings = {};
             ratingsSnap.forEach(r => {
                 if(r.data().username === currentUser.username) myRatings[r.data().bookId] = r.data().score;
@@ -1031,7 +1024,6 @@
                     if(r.data().username === otherUser) otherRatings[r.data().bookId] = r.data().score;
                 });
 
-                // חישוב הפרשים מוחלטים על ספרים משותפים
                 let sharedBooksCount = 0;
                 let absoluteDiffSum = 0;
 
@@ -1044,7 +1036,6 @@
 
                 if(sharedBooksCount > 0) {
                     const avgDiff = absoluteDiffSum / sharedBooksCount;
-                    // המרה לאחוז התאמה ($100\%$ התאמה עבור הפרש 0, $0\%$ עבור הפרש מקסימלי של 9)
                     const matchPercent = (((9 - avgDiff) / 9) * 100).toFixed(0);
                     matchesResults.push({ username: otherUser, pct: matchPercent, count: sharedBooksCount });
                 }
@@ -1052,21 +1043,19 @@
 
             grid.innerHTML = matchesResults.length === 0 ? "עליך לדרג ספרים קודם כדי למצוא התאמות טעם עם קוראים אחרים." : "";
             
-            // מיון התאמות מהגבוהה לנמוכה
             matchesResults.sort((a,b) => b.pct - a.pct);
             matchesResults.forEach(m => {
                 grid.innerHTML += `
                     <div class="card" style="border-right: 5px solid var(--success);">
                         <div class="card-title">👤 ${m.username}</div>
                         <div style="font-size:24px; font-weight:900; color:var(--success); margin:10px 0;">${m.pct}% התאמה</div>
-                        <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">מבוסס על ${m.count} ספרים משותפים ששניכם קראתם ודירגתם.</p>
+                        <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">מבוסס על ${m.count} ספרים משותפים.</p>
                         <button class="btn btn-primary" onclick="openDirectChatWithUser('${m.username}')">שלח הודעה</button>
                     </div>
                 `;
             });
         }
 
-        // תצוגת קהילת משתמשים וחיפושים מתקדמים
         async function renderUsersView() {
             const grid = document.getElementById('users-grid');
             grid.innerHTML = "טוען חברי קהילה...";
@@ -1082,10 +1071,8 @@
                 const u = uDoc.data();
                 if(u.username === currentUser.username) return;
 
-                // סינון טקסטואלי
                 if(txtSearch && !u.username.toLowerCase().includes(txtSearch)) return;
 
-                // סינון מתקדם לפי דירוג ספרים מינימלי
                 let passedRatingFilter = minRatingSearch === 0;
                 let userScores = [];
                 ratingsSnap.forEach(r => {
@@ -1126,12 +1113,11 @@
         window.reportUserAction = async function(target) {
             if(!confirm(`האם ברצונך לפתוח תיק דיווח רשמי נגד המשתמש ${target}?`)) return;
             await addDoc(collection(db, "Reports"), {
-                reportedItem: target, type: "User", reporter: currentUser.username, assignedAdmin: "gadischw", status: "Open", epoch: Date.now()
+                reportedItem: target, type: "User", reporter: currentUser.username, assignedAdmin: "Book-U-Vers", status: "Open", epoch: Date.now()
             });
-            alert("הדיווח נרשם וייבדק על ידי צוות הניהול בהקדם.");
+            alert("הדיווח נרשם וייבדק על ידי צוות הניהול.");
         }
 
-        // פאנל סטטיסטיקות מתקדם (Admins ומעלה)
         async function renderStatsView() {
             const grid = document.getElementById('stats-grid');
             const u = await getDocs(collection(db, "users"));
@@ -1147,7 +1133,6 @@
             `;
         }
 
-        // פאנל ניהול וטיפול בדיווחים (Admins ומעלה)
         async function renderReportsView() {
             const box = document.getElementById('reports-container');
             box.innerHTML = "טוען תיקי דיווח פתוחים...";
@@ -1174,7 +1159,6 @@
 
         window.closeTicket = async function(id, admin) {
             await updateDoc(doc(db, "Reports", id), { status: "Closed" });
-            // הורדת עומס מהאדמין
             const aDoc = await getDoc(doc(db, "users", admin));
             if(aDoc.exists()) {
                 let currentLoad = aDoc.data().activeTicketsLoad || 1;
@@ -1186,12 +1170,11 @@
 
         window.suspendUserViaTicket = async function(targetUser, ticketId, admin) {
             await updateDoc(doc(db, "users", targetUser), { isSuspended: true });
-            await writeAuditLog("השעיות", `המשתמש ${targetUser} הושעה לצמיתות מהמערכת בעקבות דיווח.`);
-            alert(`המשתמש ${targetUser} הושעה בהצלחה.`);
+            await writeAuditLog("השעיות", `המשתמש ${targetUser} הושעה מהמערכת.`);
+            alert(`המשתמש ${targetUser} הושעה.`);
             closeTicket(ticketId, admin);
         }
 
-        // פאנל ניהול צוות ודרגות אדמין (Admin+ ומעלה)
         async function renderAdminsView() {
             const tbody = document.getElementById('admins-table-body');
             tbody.innerHTML = "טוען רשימות מנהלים...";
@@ -1201,7 +1184,7 @@
 
             usersSnap.forEach(uDoc => {
                 const u = uDoc.data();
-                if(u.role === 'User') return; // מציג רק אנשי צוות ניהול
+                if(u.role === 'User') return;
 
                 tbody.innerHTML += `
                     <tr>
@@ -1211,7 +1194,7 @@
                         <td>
                             <button class="btn btn-warning" style="padding:4px 8px; font-size:12px;" onclick="changeAdminRole('${u.username}', 'Admin')">הורד ל-Admin</button>
                             <button class="btn btn-primary" style="padding:4px 8px; font-size:12px;" onclick="changeAdminRole('${u.username}', 'Admin+')">העלה ל-Admin+</button>
-                            <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="stripAdminRole('${u.username}')">בטל מינוי ניהולי</button>
+                            <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="stripAdminRole('${u.username}')">בטל מינוי</button>
                         </td>
                     </tr>
                 `;
@@ -1234,26 +1217,24 @@
         }
 
         window.changeAdminRole = async function(target, targetRole) {
-            if(target === "gadischw") return alert("אבטחת מערכת: לא ניתן לשנות את הדרגה של ה-SuperAdmin הראשי.");
+            if(target.toLowerCase() === "book-u-vers") return alert("אבטחת מערכת: לא ניתן לשנות את הדרגה של ה-SuperAdmin הראשי.");
             
-            // בדיקת הרשאות SuperAdmin לשינוי דרגות Admin+
             if(currentUser.role !== 'SuperAdmin' && targetRole === 'Admin+') {
                 return alert("אבטחת מערכת: רק ה-SuperAdmin הראשי רשאי למנות מנהלים לדרגת Admin+.");
             }
 
             await updateDoc(doc(db, "users", target), { role: targetRole });
-            await writeAuditLog("ניהול אדמינים", `שונתה דרגת המנהל של ${target} לדרגת ${targetRole}`);
+            await writeAuditLog("ניהול אדמינים", `שונתה דרגת המנהל של ${target} ל- ${targetRole}`);
             renderAdminsView();
         }
 
         window.stripAdminRole = async function(target) {
-            if(target === "gadischw") return alert("אבטחת מערכת: לא ניתן לבטל את הרשאות ה-SuperAdmin.");
+            if(target.toLowerCase() === "book-u-vers") return alert("אבטחת מערכת: לא ניתן לבטל את הרשאות ה-SuperAdmin.");
             await updateDoc(doc(db, "users", target), { role: "User" });
-            await writeAuditLog("ניהול אדמינים", `בוטלו הרשאות הניהול לחלוטין עבור המשתמש: ${target}`);
+            await writeAuditLog("ניהול אדמינים", `בוטלו הרשאות הניהול עבור: ${target}`);
             renderAdminsView();
         }
 
-        // יומן פעילות מערכת מאובטח (Admin+ ומעלה)
         async function renderAuditLogsView() {
             const container = document.getElementById('system-audit-logs');
             container.innerHTML = "טוען יומן אבטחה...";
@@ -1273,11 +1254,9 @@
             });
         }
 
-        // ניהול חלונות מודאלים
         window.openModal = function(id) { document.getElementById(id).style.display = 'flex'; }
         window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; }
 
-        // אתחול האפליקציה בטעינה הראשונית
         initAppTheme();
     </script>
 </body>
