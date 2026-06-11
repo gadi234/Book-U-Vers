@@ -50,7 +50,6 @@
             display: flex;
         }
 
-        /* מסך כניסה */
         #auth-screen {
             display: flex;
             flex-direction: column;
@@ -140,7 +139,6 @@
             width: 100%;
         }
 
-        /* מבנה ראשי של האפליקציה */
         #app-screen {
             display: none;
             width: 100vw;
@@ -220,7 +218,6 @@
             align-items: center;
         }
 
-        /* כרטיסים וגריד */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -243,7 +240,6 @@
             margin-bottom: 10px;
         }
 
-        /* טבלאות */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -266,7 +262,6 @@
             font-weight: 700;
         }
 
-        /* שיחות וצ'אט */
         .chat-container {
             display: grid;
             grid-template-columns: 320px 1fr;
@@ -327,7 +322,6 @@
             gap: 15px;
         }
 
-        /* מודאלים */
         .modal {
             display: none;
             position: fixed;
@@ -347,7 +341,6 @@
             border: 1px solid var(--border);
         }
 
-        /* רשימות לוגים */
         .log-list {
             list-style: none;
             max-height: 400px;
@@ -373,7 +366,7 @@
             <div class="auth-title" id="auth-panel-title">התחברות לקהילה</div>
             
             <div class="form-group">
-                <label>שם משתמש (השאר ריק אם אתה הסופר-אדמין):</label>
+                <label>שם משתמש:</label>
                 <input type="text" id="auth-username" placeholder="הזן שם משתמש">
             </div>
             <div class="form-group">
@@ -467,7 +460,6 @@
                 </div>
                 <div style="display:flex; gap:15px; margin-bottom:20px;">
                     <input type="text" id="user-search" class="form-group" style="margin:0; flex:1;" placeholder="🔍 חפש לפי שם משתמש..." oninput="renderUsersView()">
-                    <input type="number" id="rating-search-min" class="form-group" style="margin:0; width:180px;" placeholder="⭐ ציון ספר מינימלי" oninput="renderUsersView()">
                 </div>
                 <div class="cards-grid" id="users-grid"></div>
             </div>
@@ -500,7 +492,6 @@
                         <tr>
                             <th>שם משתמש</th>
                             <th>דרגה נוכחית</th>
-                            <th>עומס תיקים</th>
                             <th>פעולות קביעת דרג</th>
                         </tr>
                     </thead>
@@ -541,21 +532,19 @@
                 <button class="btn btn-primary" onclick="submitBookRating()">שמור דירוג קריאה</button>
                 <button class="btn btn-secondary" onclick="closeModal('book-detail-modal')">סגור חלון</button>
             </div>
-            <h3 style="margin-top:20px; margin-bottom:10px;">דירוגי קוראים אחרים:</h3>
-            <div id="modal-book-reviews" style="max-height:150px; overflow-y:auto; font-size:14px;"></div>
         </div>
     </div>
 
     <div id="suggest-book-modal" class="modal">
         <div class="modal-content">
-            <h2>הצעת ספר חדש למאגר העולמי</h2>
+            <h2>הצעת ספר חדש למאגר</h2>
             <div class="form-group" style="margin-top:15px;">
                 <label>שם הספר:</label>
                 <input type="text" id="suggest-title">
             </div>
             <div class="form-group">
-                <label>תיאור קצר / תקציר:</label>
-                <textarea id="suggest-desc" rows="3" style="width:100%; padding:10px; background:var(--bg-element); border:1px solid var(--border); color:white; border-radius:8px;"></textarea>
+                <label>תקציר הספר:</label>
+                <textarea id="suggest-desc" rows="3"></textarea>
             </div>
             <div style="display:flex; gap:10px;">
                 <button class="btn btn-success" onclick="submitBookSuggestion()">שלח הצעה לאישור</button>
@@ -571,30 +560,23 @@
             updateDoc, deleteDoc, query, where, orderBy, addDoc 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        let savedApiKey = localStorage.getItem("bm_firebase_key");
-        if (!savedApiKey || savedApiKey.includes("ABCDEF")) {
-            savedApiKey = prompt("אנא הזן את ה-Web API Key (הקוד שמתחיל ב-AIzaSy) כדי להפעיל את החיבור:");
-            if (savedApiKey) {
-                localStorage.setItem("bm_firebase_key", savedApiKey.trim());
-            } else {
-                savedApiKey = "AIzaSy_placeholder_error";
-            }
-        }
-
         const firebaseConfig = {
-            apiKey: savedApiKey,
+            apiKey: "AIzaSyCvMu7UqpgqEWShlPwcX-Jr0wBU2taXh3I", 
             authDomain: "bookuvers-fe1ec.firebaseapp.com",
             projectId: "bookuvers-fe1ec",
-            storageBucket: "bookuvers-fe1ec.appspot.com",
-            messagingSenderId: "1234567890", // שנה לערך האמיתי במידת הצורך
-            appId: "1:1234567890:web:1234567890" // שנה לערך האמיתי במידת הצורך
+            storageBucket: "bookuvers-fe1ec.firebasestorage.app",
+            messagingSenderId: "108494167059",
+            appId: "1:108494167059:web:3af44666632cf8d93333e6"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         let currentUser = null;
-        let fakeUserIP = "192.168.1.10"; 
+        let allUsers = [];
+        let allBooks = [];
+        let currentActiveChatId = null;
+        let selectedBookId = null;
 
         async function cryptoHash(password, username) {
             const salt = username.toLowerCase() + "_bookmatch_secure_salt_2026";
@@ -622,12 +604,21 @@
             if(sideBtn) sideBtn.innerText = str;
         }
 
-        window.switchView = function(viewId) {
+        window.switchView = async function(viewId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
             
             const targetView = document.getElementById('view-' + viewId);
             if(targetView) targetView.classList.add('active');
+
+            if(viewId === 'books') loadBooksView();
+            if(viewId === 'users') loadUsersView();
+            if(viewId === 'chats') loadChatsView();
+            if(viewId === 'matches') loadMatchesView();
+            if(viewId === 'stats') loadStatsView();
+            if(viewId === 'reports') loadReportsView();
+            if(viewId === 'admins') loadAdminsView();
+            if(viewId === 'logs') loadSystemLogsView();
         }
 
         async function writeAuditLog(actionType, detailDescription) {
@@ -639,9 +630,7 @@
                     actionType: actionType,
                     description: detailDescription
                 });
-            } catch(e) {
-                console.error("שגיאה ברישום לוג:", e);
-            }
+            } catch(e) { console.error(e); }
         }
 
         window.handleAuth = async function(type) {
@@ -653,25 +642,13 @@
 
             if(type === 'register') {
                 if(!user) return alert("נא למלא שם משתמש.");
+                if(pass.length < 6) return alert("הסיסמה חייבת להיות לפחות 6 תווים.");
                 
-                if(isSuperAdminName) {
-                    const superCheck = await getDoc(doc(db, "users", "Book-U-Vers"));
-                    if(superCheck.exists()) {
-                        return alert("שגיאה: השם Book-U-Vers שמור לסופר-אדמין בלבד והחשבון כבר קיים!");
-                    }
-                }
-
-                if(pass.length < 6) return alert("אבטחה: הסיסמה חייבת להכיל לפחות 6 תווים.");
-                const passHash = await cryptoHash(pass, user);
-
                 try {
-                    const rateCheck = await getDoc(doc(db, "RateLimits", fakeUserIP));
-                    if(rateCheck.exists() && !isSuperAdminName) { 
-                        const lastReg = rateCheck.data().timestamp;
-                        if(Date.now() - lastReg < 5 * 60 * 60 * 1000) {
-                            return alert("אבטחת מערכת: ניתן לפתוח חשבון אחד בלבד כל 5 שעות מכתובת IP זו.");
-                        }
-                    }
+                    const passHash = await cryptoHash(pass, user);
+                    const userRef = doc(db, "users", isSuperAdminName ? "Book-U-Vers" : user);
+                    const checkExist = await getDoc(userRef);
+                    if(checkExist.exists()) return alert("שם משתמש תפוס.");
 
                     const newUserObj = {
                         username: isSuperAdminName ? "Book-U-Vers" : user,
@@ -680,30 +657,21 @@
                         joinedAt: new Date().toLocaleDateString('he-IL'),
                         lastSeen: new Date().toLocaleString('he-IL'),
                         preferedTheme: document.documentElement.getAttribute('data-theme') || 'dark',
+                        ratings: {},
                         isSuspended: false
                     };
 
-                    await setDoc(doc(db, "users", newUserObj.username), newUserObj);
-                    if(!isSuperAdminName) await setDoc(doc(db, "RateLimits", fakeUserIP), { timestamp: Date.now() });
-                    
-                    alert(`החשבון ${newUserObj.username} נוצר בהצלחה בענן! כעת בצע התחברות.`);
-                } catch(e) {
-                    alert("שגיאה ברישום לפיירבייס. ודא שחוקי האבטחה (Rules) ב-Firestore פתוחים לקריאה/כתיבה.");
-                    console.error(e);
-                }
+                    await setDoc(userRef, newUserObj);
+                    await writeAuditLog("רישום", `משתמש חדש נרשם: ${newUserObj.username}`);
+                    alert("החשבון נוצר בהצלחה! בצע התחברות כעת.");
+                } catch(e) { alert("שגיאה ברישום. ודא חוקי אבטחה ב-Firestore."); }
             } 
             
             else if(type === 'login') {
-                let targetUser = user;
-                if(!user || isSuperAdminName) {
-                    targetUser = "Book-U-Vers";
-                }
-
+                let targetUser = user || "Book-U-Vers";
                 try {
-                    const userRef = doc(db, "users", targetUser);
-                    const userSnap = await getDoc(userRef);
-                    
-                    if(!userSnap.exists()) return alert("המשתמש אינו קיים במערכת. יש לבצע רישום תחילה.");
+                    const userSnap = await getDoc(doc(db, "users", targetUser));
+                    if(!userSnap.exists()) return alert("משתמש לא נמצא.");
                     
                     const passHash = await cryptoHash(pass, targetUser);
                     const userData = userSnap.data();
@@ -712,65 +680,322 @@
                     if(userData.isSuspended) return alert("חשבון זה מושעה.");
 
                     currentUser = userData;
-                    await updateDoc(userRef, { lastSeen: new Date().toLocaleString('he-IL') });
+                    await updateDoc(doc(db, "users", targetUser), { lastSeen: new Date().toLocaleString('he-IL') });
                     
                     setupRoleBasedUI();
-                    
                     document.getElementById('auth-screen').style.display = 'none';
                     document.getElementById('app-screen').style.display = 'block';
                     
-                    if(currentUser.preferedTheme) {
-                        document.documentElement.setAttribute('data-theme', currentUser.preferedTheme);
-                        updateThemeUIComponents(currentUser.preferedTheme);
-                    }
-
                     loadPersonalLogs();
                     switchView('profile');
-                } catch(e) {
-                    alert("שגיאה בהתחברות. ודא שהרשת תקינה ושחוקי האבטחה ב-Firebase מאפשרים גישה.");
-                    console.error(e);
-                }
+                } catch(e) { alert("שגיאה בהתחברות."); }
             }
         }
 
         function setupRoleBasedUI() {
             const role = currentUser.role;
-            if(role === 'Admin' || role === 'Admin+' || role === 'SuperAdmin') {
+            if(['Admin', 'Admin+', 'SuperAdmin'].includes(role)) {
                 document.getElementById('menu-stats').style.display = 'flex';
                 document.getElementById('menu-reports').style.display = 'flex';
             }
-            if(role === 'Admin+' || role === 'SuperAdmin') {
+            if(['Admin+', 'SuperAdmin'].includes(role)) {
                 document.getElementById('menu-admins').style.display = 'flex';
                 document.getElementById('menu-logs').style.display = 'flex';
             }
-            
             document.getElementById('prof-username').value = currentUser.username;
-            document.getElementById('prof-meta').innerText = `דרגת הרשאה: ${currentUser.role} | תאריך הצטרפות: ${currentUser.joinedAt}`;
+            document.getElementById('prof-meta').innerText = `דרגה: ${currentUser.role} | הצטרף ב-: ${currentUser.joinedAt}`;
         }
 
-        window.saveProfileChanges = async function() {
-            const newPass = document.getElementById('prof-password').value;
-            let updates = {};
+        async function loadPersonalLogs() {
+            try {
+                const qSnap = await getDocs(query(collection(db, "ActivityLogs"), where("operator", "==", currentUser.username)));
+                const container = document.getElementById('personal-logs');
+                container.innerHTML = "";
+                qSnap.forEach(d => {
+                    container.innerHTML += `<li class="log-item"><b>[${d.data().timestamp}]</b> ${d.data().description}</li>`;
+                });
+            } catch(e){}
+        }
+
+        async function loadBooksView() {
+            const snap = await getDocs(collection(db, "books"));
+            allBooks = [];
+            const grid = document.getElementById('books-grid');
+            grid.innerHTML = "";
+            snap.forEach(d => {
+                const b = d.data();
+                b.id = d.id;
+                allBooks.push(b);
+                grid.innerHTML += `
+                    <div class="card">
+                        <div class="card-title">${b.title}</div>
+                        <p style="color:var(--text-muted); font-size:14px; margin-bottom:15px;">${b.description || 'אין תקציר'}</p>
+                        <button class="btn btn-primary" onclick="openBookModal('${b.id}')">👁️ פרטים ודירוג</button>
+                    </div>
+                `;
+            });
+        }
+
+        window.openBookModal = async function(id) {
+            selectedBookId = id;
+            const book = allBooks.find(b => b.id === id);
+            document.getElementById('modal-book-title').innerText = book.title;
+            document.getElementById('modal-book-desc').innerText = book.description || '';
             
-            if(newPass.length >= 6) {
-                updates.passwordHash = await cryptoHash(newPass, currentUser.username);
-                await updateDoc(doc(db, "users", currentUser.username), updates);
-                alert("הסיסמה עודכנה ושמורה בבטחה בענן.");
-                document.getElementById('prof-password').value = "";
-            } else if (newPass.length > 0) {
-                return alert("הסיסמה החדשה חייבת להיות לפחות 6 תווים.");
-            } else {
-                alert("לא בוצע שינוי.");
-            }
+            const myRating = currentUser.ratings ? (currentUser.ratings[id] || 0) : 0;
+            document.getElementById('my-book-rating').value = myRating;
+            
+            openModal('book-detail-modal');
         }
 
-        window.deleteAccountAction = async function() {
-            if(currentUser.role === 'SuperAdmin') return alert("אבטחת מערכת: לא ניתן למחוק את חשבון ה-SuperAdmin הראשי.");
-            if(!confirm("האם אתה בטוח לחלוטין? החשבון יימחק מהמערכת.")) return;
+        window.submitBookRating = async function() {
+            const rateVal = parseInt(document.getElementById('my-book-rating').value);
+            if(!currentUser.ratings) currentUser.ratings = {};
+            currentUser.ratings[selectedBookId] = rateVal;
 
-            await writeAuditLog("ניהול משתמשים", `המשתמש ${currentUser.username} מחק את החשבון של עצמו.`);
-            await deleteDoc(doc(db, "users", currentUser.username));
-            logout();
+            await updateDoc(doc(db, "users", currentUser.username), { ratings: currentUser.ratings });
+            await writeAuditLog("דירוג ספר", `העניק ציון ${rateVal} לספר ${selectedBookId}`);
+            alert("הדירוג נשמר בענן!");
+            closeModal('book-detail-modal');
+        }
+
+        window.submitBookSuggestion = async function() {
+            const title = document.getElementById('suggest-title').value.trim();
+            const desc = document.getElementById('suggest-desc').value.trim();
+            if(!title) return alert("חובה להזין שם ספר");
+
+            await addDoc(collection(db, "books"), { title, description: desc, createdAt: Date.now() });
+            await writeAuditLog("הצעת ספר", `הציע את הספר החדש: ${title}`);
+            alert("הספר נוסף בהצלחה למאגר!");
+            closeModal('suggest-book-modal');
+            loadBooksView();
+        }
+
+        async function loadUsersView() {
+            const snap = await getDocs(collection(db, "users"));
+            allUsers = [];
+            snap.forEach(d => { if(d.id !== currentUser.username) allUsers.push(d.data()); });
+            renderUsersView();
+        }
+
+        window.renderUsersView = function() {
+            const queryTxt = document.getElementById('user-search').value.toLowerCase();
+            const grid = document.getElementById('users-grid');
+            grid.innerHTML = "";
+
+            allUsers.forEach(u => {
+                if(queryTxt && !u.username.toLowerCase().includes(queryTxt)) return;
+                grid.innerHTML += `
+                    <div class="card">
+                        <div class="card-title">${u.username}</div>
+                        <p style="font-size:14px; color:var(--text-muted);">דרגה: ${u.role}</p>
+                        <button class="btn btn-secondary" style="margin-top:10px;" onclick="startChatWith('${u.username}')">💬 פתח צ'אט</button>
+                    </div>
+                `;
+            });
+        }
+
+        window.startChatWith = async function(targetUser) {
+            const chatId = [currentUser.username, targetUser].sort().join("_");
+            await setDoc(doc(db, "Chats", chatId), {
+                participants: [currentUser.username, targetUser],
+                lastUpdate: Date.now()
+            }, { merge: true });
+            
+            switchView('chats');
+        }
+
+        async function loadChatsView() {
+            const snap = await getDocs(collection(db, "Chats"));
+            const sidebar = document.getElementById('chats-threads');
+            sidebar.innerHTML = "";
+            
+            snap.forEach(d => {
+                const c = d.data();
+                if(c.participants.includes(currentUser.username)) {
+                    const partner = c.participants.find(p => p !== currentUser.username);
+                    sidebar.innerHTML += `
+                        <div class="chat-item" id="thread-${d.id}" onclick="openChatThread('${d.id}')">
+                            <b>🤝 ${partner}</b>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        window.openChatThread = async function(id) {
+            currentActiveChatId = id;
+            document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+            const el = document.getElementById('thread-' + id);
+            if(el) el.classList.add('active');
+
+            const msgBox = document.getElementById('chat-msg-box');
+            msgBox.innerHTML = "טוען הודעות...";
+
+            const snap = await getDocs(query(collection(db, `Chats/${id}/Messages`), orderBy("timestamp", "asc")));
+            msgBox.innerHTML = "";
+            snap.forEach(d => {
+                const m = d.data();
+                const side = m.sender === currentUser.username ? 'outgoing' : 'incoming';
+                msgBox.innerHTML += `<div class="msg ${side}"><b>${m.sender}:</b><br>${m.text}</div>`;
+            });
+            msgBox.scrollTop = msgBox.scrollHeight;
+            document.getElementById('report-chat-btn').style.display = "block";
+        }
+
+        window.sendChatMsg = async function() {
+            const input = document.getElementById('chat-input-msg');
+            const txt = input.value.trim();
+            if(!txt || !currentActiveChatId) return;
+
+            await addDoc(collection(db, `Chats/${currentActiveChatId}/Messages`), {
+                sender: currentUser.username,
+                text: txt,
+                timestamp: Date.now()
+            });
+
+            input.value = "";
+            openChatThread(currentActiveChatId);
+        }
+
+        window.reportCurrentChat = async function() {
+            if(!currentActiveChatId) return;
+            if(!confirm("האם ברצונך לדווח על שיחה זו לצוות הניהול?")) return;
+
+            await addDoc(collection(db, "Reports"), {
+                reportedChat: currentActiveChatId,
+                reporter: currentUser.username,
+                timestamp: new Date().toLocaleString(),
+                status: 'Open'
+            });
+            alert("הדיווח התקבל בשרת ויטופל בהקדם.");
+        }
+
+        async function loadMatchesView() {
+            const grid = document.getElementById('matches-grid');
+            grid.innerHTML = "מחשב התאמות קריאה מול משתמשי הקהילה...";
+            
+            const snap = await getDocs(collection(db, "users"));
+            const users = [];
+            snap.forEach(d => { if(d.id !== currentUser.username) users.push(d.data()); });
+
+            grid.innerHTML = "";
+            let matchFound = false;
+
+            users.forEach(u => {
+                let score = 0;
+                if(!u.ratings || !currentUser.ratings) return;
+
+                Object.keys(currentUser.ratings).forEach(bId => {
+                    if(u.ratings[bId] && Math.abs(currentUser.ratings[bId] - u.ratings[bId]) <= 2) {
+                        score += 25;
+                    }
+                });
+
+                if(score > 0) {
+                    matchFound = true;
+                    grid.innerHTML += `
+                        <div class="card" style="border-right: 5px solid var(--success);">
+                            <div class="card-title">🔥 התאמה עם ${u.username}!</div>
+                            <p>אחוז התאמה בטעם הספרותי: <b>${Math.min(score, 100)}%</b></p>
+                            <button class="btn btn-primary" style="margin-top:10px;" onclick="startChatWith('${u.username}')">שלח הודעה</button>
+                        </div>
+                    `;
+                }
+            });
+
+            if(!matchFound) grid.innerHTML = "<p>דרג עוד ספרים כדי שהאלגוריתם ימצא לך חברים תואמים!</p>";
+        }
+
+        async function loadStatsView() {
+            const uSnap = await getDocs(collection(db, "users"));
+            const bSnap = await getDocs(collection(db, "books"));
+            const rSnap = await getDocs(collection(db, "Reports"));
+
+            const grid = document.getElementById('stats-grid');
+            grid.innerHTML = `
+                <div class="card"><h3>👥 משתמשים רשומים</h3><h2>${uSnap.size}</h2></div>
+                <div class="card"><h3>📚 ספרים במערכת</h3><h2>${bSnap.size}</h2></div>
+                <div class="card"><h3>🚨 דיווחים פתוחים</h3><h2>${rSnap.size}</h2></div>
+            `;
+        }
+
+        async function loadReportsView() {
+            const container = document.getElementById('reports-container');
+            container.innerHTML = "טוען תיקים...";
+            const snap = await getDocs(collection(db, "Reports"));
+            container.innerHTML = "";
+
+            snap.forEach(d => {
+                const r = d.data();
+                container.innerHTML += `
+                    <div class="card" style="margin-bottom:15px; border-right:4px solid var(--danger);">
+                        <h4>דיווח על צ'אט: ${r.reportedChat}</h4>
+                        <p>התקבל מאת: ${r.reporter} | סטטוס: <b>${r.status}</b></p>
+                        <button class="btn btn-danger" style="margin-top:10px; padding:5px 10px; font-size:12px;" onclick="closeReport('${d.id}')">סגור תיק דיווח</button>
+                    </div>
+                `;
+            });
+        }
+
+        window.closeReport = async function(id) {
+            await deleteDoc(doc(db, "Reports", id));
+            alert("תיק הדיווח נסגר ונמחק מהמערכת.");
+            loadReportsView();
+        }
+
+        async function loadAdminsView() {
+            const snap = await getDocs(collection(db, "users"));
+            const tbody = document.getElementById('admins-table-body');
+            tbody.innerHTML = "";
+
+            snap.forEach(d => {
+                const u = d.data();
+                if(['Admin', 'Admin+', 'SuperAdmin'].includes(u.role)) {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><b>${u.username}</b></td>
+                            <td>${u.role}</td>
+                            <td>
+                                <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="demoteUser('${u.username}')">הסר מניהול</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+        }
+
+        window.appointNewAdmin = async function() {
+            const name = document.getElementById('new-admin-username').value.trim();
+            const role = document.getElementById('new-admin-role').value;
+            if(!name) return;
+
+            const ref = doc(db, "users", name);
+            const check = await getDoc(ref);
+            if(!check.exists()) return alert("משתמש לא נמצא במערכת.");
+
+            await updateDoc(ref, { role: role });
+            await writeAuditLog("ניהול צוות", `קידום המשתמש ${name} לדרגת ${role}`);
+            alert(`המשתמש ${name} מונה בהצלחה ל-${role}!`);
+            loadAdminsView();
+        }
+
+        window.demoteUser = async function(name) {
+            if(name === 'Book-U-Vers') return alert("לא ניתן להסיר את הסופר-אדמין.");
+            await updateDoc(doc(db, "users", name), { role: 'User' });
+            await writeAuditLog("ניהול צוות", `הסרת ניהול למשתמש ${name}`);
+            alert("המנהל הוסר והוחזר לדרגת משתמש רגיל.");
+            loadAdminsView();
+        }
+
+        async function loadSystemLogsView() {
+            const snap = await getDocs(collection(db, "ActivityLogs"));
+            const list = document.getElementById('system-audit-logs');
+            list.innerHTML = "";
+            snap.forEach(d => {
+                const l = d.data();
+                list.innerHTML += `<li class="log-item">⏱️ <b>[${l.timestamp}]</b> (${l.operator}) - <i>[${l.actionType}]</i> ${l.description}</li>`;
+            });
         }
 
         window.logout = function() {
@@ -781,31 +1006,9 @@
             document.getElementById('auth-password').value = "";
         }
 
-        async function loadPersonalLogs() {
-            try {
-                const qSnap = await getDocs(query(collection(db, "ActivityLogs"), where("operator", "==", currentUser.username)));
-                const container = document.getElementById('personal-logs');
-                container.innerHTML = "";
-                qSnap.forEach(doc => {
-                    container.innerHTML += `<li class="log-item"><b>[${doc.data().timestamp}]</b> ${doc.data().description}</li>`;
-                });
-            } catch(e) {
-                console.log("אין עדיין לוגים אישיים או שחוקי האבטחה חוסמים אותם.");
-            }
-        }
-
-        // פונקציות עזר ומצילים זמניים למנוע קריסות של כפתורי HTML
         window.openModal = function(id) { document.getElementById(id).style.display = 'flex'; }
         window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; }
-        window.renderUsersView = function() { console.log("חיפוש משתמשים..."); }
-        window.luckyRandomUser = function() { alert("פיצ'ר קורא אקראי ייפתח בגרסה הבאה!"); }
-        window.submitBookRating = function() { alert("הדירוג נשמר זמנית!"); closeModal('book-detail-modal'); }
-        window.submitBookSuggestion = function() { alert("הצעת הספר נשלחה לאישור המנהלים!"); closeModal('suggest-book-modal'); }
-        window.sendChatMsg = function() { console.log("שולח הודעה..."); }
-        window.reportCurrentChat = function() { console.log("מדווח על צ'אט..."); }
-        window.appointNewAdmin = function() { alert("רק סופר אדמין יכול למנות מנהלים כרגע."); }
 
-        // אתחול ערכות נושא ראשוני בדף
         const savedTheme = localStorage.getItem('bm_theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
         updateThemeUIComponents(savedTheme);
