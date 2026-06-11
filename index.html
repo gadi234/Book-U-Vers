@@ -312,7 +312,6 @@
 
         .msg.incoming { background-color: var(--bg-surface); align-self: flex-start; border: 1px solid var(--border); }
         .msg.outgoing { background-color: var(--accent); color: white; align-self: flex-end; }
-        .msg.system { background-color: var(--bg-element); color: var(--text-muted); align-self: center; text-align: center; font-size: 13px; }
 
         .chat-input-area {
             padding: 20px;
@@ -343,7 +342,7 @@
 
         .log-list {
             list-style: none;
-            max-height: 400px;
+            max-height: 250px;
             overflow-y: auto;
             background-color: var(--bg-surface);
             border: 1px solid var(--border);
@@ -394,8 +393,9 @@
                     <li class="sidebar-item" onclick="switchView('users')">👥 קהילת משתמשים</li>
                     
                     <li class="sidebar-item admin-badge" id="menu-stats" style="display:none;" onclick="switchView('stats')">📊 סטטיסטיקות</li>
-                    <li class="sidebar-item admin-badge" id="menu-reports" style="display:none;" onclick="switchView('reports')">🚨 תיקי דיווחים</li>
-                    <li class="sidebar-item admin-plus-badge" id="menu-admins" style="display:none;" onclick="switchView('admins')">🛠️ ניהול צוות אדמין</li>
+                    <li class="sidebar-item admin-badge" id="menu-reports" style="display:none;" onclick="switchView('reports')">🚨 דיווחים</li>
+                    <li class="sidebar-item admin-plus-badge" id="menu-admins" style="display:none;" onclick="switchView('admins')">🛠️ צוות ניהול</li>
+                    <li class="sidebar-item super-badge" id="menu-super-books" style="display:none;" onclick="switchView('super-books')">📖 ניהול ספרים (סופר)</li>
                     <li class="sidebar-item admin-plus-badge" id="menu-logs" style="display:none;" onclick="switchView('logs')">📜 יומן מערכת</li>
                 </ul>
             </div>
@@ -412,8 +412,8 @@
                         <input type="text" id="prof-username" readonly>
                     </div>
                     <div class="form-group">
-                        <label>סיסמה חדשה (אם ברצונך לשנות):</label>
-                        <input type="password" id="prof-password" placeholder="הקלד סיסמה חדשה">
+                        <label>סיסמה חדשה:</label>
+                        <input type="password" id="prof-password" placeholder="הקלד סיסמה חדשה לעדכון">
                     </div>
                     <p style="margin-bottom: 15px; font-size:14px; color:var(--text-muted);" id="prof-meta"></p>
                     <div style="display: flex; gap: 10px;">
@@ -438,11 +438,10 @@
                 <div class="chat-container">
                     <div class="chat-sidebar" id="chats-threads"></div>
                     <div class="chat-main">
-                        <div class="chat-messages" id="chat-msg-box">בחר שיחה כדי להתחיל להתכתב</div>
+                        <div class="chat-messages" id="chat-msg-box">בחר שיחה מהרשימה בצד כדי להתחיל</div>
                         <div class="chat-input-area">
                             <input type="text" id="chat-input-msg" placeholder="הקלד הודעה..." style="flex:1; padding:12px; background:var(--bg-element); border:1px solid var(--border); color:white;">
                             <button class="btn btn-primary" onclick="sendChatMsg()">שלח</button>
-                            <button class="btn btn-danger" id="report-chat-btn" style="display:none;" onclick="reportCurrentChat()">🚨 דווח</button>
                         </div>
                     </div>
                 </div>
@@ -458,8 +457,8 @@
                     <span>קהילת הקוראים</span>
                     <button class="btn btn-secondary" onclick="luckyRandomUser()">🎲 קורא אקראי</button>
                 </div>
-                <div style="display:flex; gap:15px; margin-bottom:20px;">
-                    <input type="text" id="user-search" class="form-group" style="margin:0; flex:1;" placeholder="🔍 חפש לפי שם משתמש..." oninput="renderUsersView()">
+                <div style="margin-bottom:20px;">
+                    <input type="text" id="user-search" class="form-group" style="margin:0;" placeholder="🔍 חפש לפי שם משתמש..." oninput="renderUsersView()">
                 </div>
                 <div class="cards-grid" id="users-grid"></div>
             </div>
@@ -470,21 +469,22 @@
             </div>
 
             <div id="view-reports" class="view-section">
-                <div class="view-title"><span>תיקי טיפול בדיווחים</span></div>
+                <div class="view-title"><span>תיקי טיפול בדיווחים ופניות</span></div>
                 <div id="reports-container"></div>
             </div>
 
             <div id="view-admins" class="view-section">
                 <div class="view-title"><span>ניהול ומינוי צוות אדמינים</span></div>
                 <div class="card" style="margin-bottom:25px;">
-                    <h3>מינוי אדמין חדש במערכת</h3>
+                    <h3>קביעת דרגת ניהול למשתמש</h3>
                     <div style="display:flex; gap:10px; margin-top:15px;">
-                        <input type="text" id="new-admin-username" style="flex:1; padding:10px; background:var(--bg-element); border:1px solid var(--border); color:white; border-radius:6px;" placeholder="שם משתמש למינוי">
+                        <input type="text" id="new-admin-username" style="flex:1; padding:10px; background:var(--bg-element); border:1px solid var(--border); color:white; border-radius:6px;" placeholder="הזן שם משתמש מדויק">
                         <select id="new-admin-role" style="width:180px; padding:10px; background:var(--bg-element); border:1px solid var(--border); color:white; border-radius:6px;">
                             <option value="Admin">Admin</option>
                             <option value="Admin+">Admin+</option>
+                            <option value="User">User (הסרה מניהול)</option>
                         </select>
-                        <button class="btn btn-success" onclick="appointNewAdmin()">מנה ואשר דרגה</button>
+                        <button class="btn btn-success" onclick="appointNewAdmin()">עדכן דרגה במערכת</button>
                     </div>
                 </div>
                 <table>
@@ -492,16 +492,43 @@
                         <tr>
                             <th>שם משתמש</th>
                             <th>דרגה נוכחית</th>
-                            <th>פעולות קביעת דרג</th>
+                            <th>סטטוס חשבון</th>
                         </tr>
                     </thead>
                     <tbody id="admins-table-body"></tbody>
                 </table>
             </div>
 
+            <div id="view-super-books" class="view-section">
+                <div class="view-title"><span>פאנל ניהול ספרים עולמי (SuperAdmin)</span></div>
+                <div class="card" style="margin-bottom:25px;">
+                    <h3>הוספת ספר ישירות למאגר העולמי (ללא צורך באישור)</h3>
+                    <div class="form-group" style="margin-top:15px;">
+                        <label>שם הספר:</label>
+                        <input type="text" id="super-book-title">
+                    </div>
+                    <div class="form-group">
+                        <label>תקציר הספר:</label>
+                        <textarea id="super-book-desc" rows="2"></textarea>
+                    </div>
+                    <button class="btn btn-success" onclick="superAddBookDirectly()">הוסף ספר באופן מיידי</button>
+                </div>
+                <h3>רשימת כל הספרים למחיקה קבועה</h3>
+                <table style="margin-top:15px;">
+                    <thead>
+                        <tr>
+                            <th>שם הספר</th>
+                            <th>מזהה ייחודי</th>
+                            <th>פעולה דרסטית</th>
+                        </tr>
+                    </thead>
+                    <tbody id="super-books-table-body"></tbody>
+                </table>
+            </div>
+
             <div id="view-logs" class="view-section">
-                <div class="view-title"><span>יומן פעילות מערכת מאובטח (Audit Log)</span></div>
-                <ul class="log-list" id="system-audit-logs" style="max-height:600px;"></ul>
+                <div class="view-title"><span>יומן מערכת מאובטח (Audit Log)</span></div>
+                <ul class="log-list" id="system-audit-logs" style="max-height:550px;"></ul>
             </div>
 
         </div>
@@ -511,11 +538,10 @@
         <div class="modal-content">
             <h2 id="modal-book-title" class="card-title">שם הספר</h2>
             <p id="modal-book-desc" style="margin-bottom:15px; color:var(--text-muted);"></p>
-            <div id="modal-book-stats" style="margin-bottom:20px; font-weight:bold;"></div>
             <div class="form-group">
                 <label>הדירוג שלך לספר זה (1 עד 10):</label>
                 <select id="my-book-rating">
-                    <option value="0">לא קראתי / ללא דירוג</option>
+                    <option value="0">ללא דירוג</option>
                     <option value="1">1 - גרוע ביותר</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -537,18 +563,33 @@
 
     <div id="suggest-book-modal" class="modal">
         <div class="modal-content">
-            <h2>הצעת ספר חדש למאגר</h2>
+            <h2>הצעת ספר חדש למערכת</h2>
             <div class="form-group" style="margin-top:15px;">
-                <label>שם הספר:</label>
+                <label>שם הספר המוצע:</label>
                 <input type="text" id="suggest-title">
             </div>
             <div class="form-group">
-                <label>תקציר הספר:</label>
+                <label>תקציר / סיבה להוספה:</label>
                 <textarea id="suggest-desc" rows="3"></textarea>
             </div>
             <div style="display:flex; gap:10px;">
-                <button class="btn btn-success" onclick="submitBookSuggestion()">שלח הצעה לאישור</button>
+                <button class="btn btn-success" onclick="submitBookSuggestion()">שלח הצעה לבדיקת אדמין</button>
                 <button class="btn btn-secondary" onclick="closeModal('suggest-book-modal')">ביטול</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="report-user-modal" class="modal">
+        <div class="modal-content">
+            <h2>הגשת דיווח על משתמש זה</h2>
+            <p style="margin-top:5px; color:var(--text-muted);" id="report-modal-target-label"></p>
+            <div class="form-group" style="margin-top:15px;">
+                <label>פרט את סיבת הדיווח (למשל: התנהגות פוגענית, ספאם):</label>
+                <textarea id="report-reason-input" rows="3" placeholder="הקלד כאן את הנימוק שלך במילים..."></textarea>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-danger" onclick="submitUserReportAction()">שלח דיווח רשמי</button>
+                <button class="btn btn-secondary" onclick="closeModal('report-user-modal')">ביטול</button>
             </div>
         </div>
     </div>
@@ -577,6 +618,7 @@
         let allBooks = [];
         let currentActiveChatId = null;
         let selectedBookId = null;
+        let reportingTargetUsername = null;
 
         async function cryptoHash(password, username) {
             const salt = username.toLowerCase() + "_bookmatch_secure_salt_2026";
@@ -618,6 +660,7 @@
             if(viewId === 'stats') loadStatsView();
             if(viewId === 'reports') loadReportsView();
             if(viewId === 'admins') loadAdminsView();
+            if(viewId === 'super-books') loadSuperBooksView();
             if(viewId === 'logs') loadSystemLogsView();
         }
 
@@ -677,7 +720,7 @@
                     const userData = userSnap.data();
                     
                     if(userData.passwordHash !== passHash) return alert("סיסמה שגויה.");
-                    if(userData.isSuspended) return alert("חשבון זה מושעה.");
+                    if(userData.isSuspended) return alert("חשבון זה מושעה על ידי צוות הניהול.");
 
                     currentUser = userData;
                     await updateDoc(doc(db, "users", targetUser), { lastSeen: new Date().toLocaleString('he-IL') });
@@ -694,6 +737,14 @@
 
         function setupRoleBasedUI() {
             const role = currentUser.role;
+            
+            // איפוס תצוגת תפריטים
+            document.getElementById('menu-stats').style.display = 'none';
+            document.getElementById('menu-reports').style.display = 'none';
+            document.getElementById('menu-admins').style.display = 'none';
+            document.getElementById('menu-logs').style.display = 'none';
+            document.getElementById('menu-super-books').style.display = 'none';
+
             if(['Admin', 'Admin+', 'SuperAdmin'].includes(role)) {
                 document.getElementById('menu-stats').style.display = 'flex';
                 document.getElementById('menu-reports').style.display = 'flex';
@@ -702,8 +753,34 @@
                 document.getElementById('menu-admins').style.display = 'flex';
                 document.getElementById('menu-logs').style.display = 'flex';
             }
+            if(role === 'SuperAdmin') {
+                document.getElementById('menu-super-books').style.display = 'flex';
+            }
+
             document.getElementById('prof-username').value = currentUser.username;
-            document.getElementById('prof-meta').innerText = `דרגה: ${currentUser.role} | הצטרף ב-: ${currentUser.joinedAt}`;
+            document.getElementById('prof-meta').innerText = `דרגת חשבון: ${currentUser.role} | תאריך הצטרפות: ${currentUser.joinedAt}`;
+        }
+
+        window.saveProfileChanges = async function() {
+            const newPass = document.getElementById('prof-password').value;
+            if(!newPass) return alert("הזן סיסמה חדשה קודם.");
+            if(newPass.length < 6) return alert("הסיסמה חייבת להיות לפחות 6 תווים.");
+
+            const newHash = await cryptoHash(newPass, currentUser.username);
+            await updateDoc(doc(db, "users", currentUser.username), { passwordHash: newHash });
+            await writeAuditLog("שינוי סיסמה", "המשתמש עדכן את סיסמת הכניסה שלו");
+            alert("הסיסמה עודכנה בהצלחה!");
+            document.getElementById('prof-password').value = "";
+        }
+
+        window.deleteAccountAction = async function() {
+            if(currentUser.username === 'Book-U-Vers') return alert("לא ניתן למחוק את חשבון הסופר-אדמין הראשי.");
+            if(!confirm("⚠️ אזהרה! האם אתה בטוח לחלוטין שברצונך למחוק את חשבונך לצמיתות? פעולה זו אינה ניתנת לביטול.")) return;
+
+            await deleteDoc(doc(db, "users", currentUser.username));
+            await writeAuditLog("מחיקת חשבון", `המשתמש ${currentUser.username} מחק את עצמו מהמערכת`);
+            alert("החשבון נמחק בהצלחה.");
+            logout();
         }
 
         async function loadPersonalLogs() {
@@ -728,8 +805,8 @@
                 allBooks.push(b);
                 grid.innerHTML += `
                     <div class="card">
-                        <div class="card-title">${b.title}</div>
-                        <p style="color:var(--text-muted); font-size:14px; margin-bottom:15px;">${b.description || 'אין תקציר'}</p>
+                        <div class="card-title">📚 ${b.title}</div>
+                        <p style="color:var(--text-muted); font-size:14px; margin-bottom:15px; height:60px; overflow:hidden;">${b.description || 'אין תקציר זמין לספר זה.'}</p>
                         <button class="btn btn-primary" onclick="openBookModal('${b.id}')">👁️ פרטים ודירוג</button>
                     </div>
                 `;
@@ -740,7 +817,7 @@
             selectedBookId = id;
             const book = allBooks.find(b => b.id === id);
             document.getElementById('modal-book-title').innerText = book.title;
-            document.getElementById('modal-book-desc').innerText = book.description || '';
+            document.getElementById('modal-book-desc').innerText = book.description || 'אין תקציר.';
             
             const myRating = currentUser.ratings ? (currentUser.ratings[id] || 0) : 0;
             document.getElementById('my-book-rating').value = myRating;
@@ -754,21 +831,30 @@
             currentUser.ratings[selectedBookId] = rateVal;
 
             await updateDoc(doc(db, "users", currentUser.username), { ratings: currentUser.ratings });
-            await writeAuditLog("דירוג ספר", `העניק ציון ${rateVal} לספר ${selectedBookId}`);
-            alert("הדירוג נשמר בענן!");
+            await writeAuditLog("דירוג ספר", `דירג את הספר "${selectedBookId}" בציון ${rateVal}`);
+            alert("הדירוג נשמר וסונכרן בהצלחה!");
             closeModal('book-detail-modal');
         }
 
         window.submitBookSuggestion = async function() {
             const title = document.getElementById('suggest-title').value.trim();
             const desc = document.getElementById('suggest-desc').value.trim();
-            if(!title) return alert("חובה להזין שם ספר");
+            if(!title) return alert("חובה למלא את שם הספר.");
 
-            await addDoc(collection(db, "books"), { title, description: desc, createdAt: Date.now() });
-            await writeAuditLog("הצעת ספר", `הציע את הספר החדש: ${title}`);
-            alert("הספר נוסף בהצלחה למאגר!");
+            await addDoc(collection(db, "Reports"), {
+                type: 'BookSuggestion',
+                bookTitle: title,
+                bookDesc: desc,
+                reporter: currentUser.username,
+                timestamp: new Date().toLocaleString('he-IL'),
+                status: 'Pending'
+            });
+
+            await writeAuditLog("הצעת ספר", `שלח הצעה להוספת הספר "${title}" לאישור הנהלה`);
+            alert("הצעתך נשלחה לצוות המנהלים ותיבדק בהקדם!");
+            document.getElementById('suggest-title').value = "";
+            document.getElementById('suggest-desc').value = "";
             closeModal('suggest-book-modal');
-            loadBooksView();
         }
 
         async function loadUsersView() {
@@ -787,12 +873,48 @@
                 if(queryTxt && !u.username.toLowerCase().includes(queryTxt)) return;
                 grid.innerHTML += `
                     <div class="card">
-                        <div class="card-title">${u.username}</div>
-                        <p style="font-size:14px; color:var(--text-muted);">דרגה: ${u.role}</p>
-                        <button class="btn btn-secondary" style="margin-top:10px;" onclick="startChatWith('${u.username}')">💬 פתח צ'אט</button>
+                        <div class="card-title">👤 ${u.username}</div>
+                        <p style="font-size:14px; color:var(--text-muted); margin-bottom:12px;">דרגה: ${u.role}</p>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn btn-secondary" style="padding:8px 12px; font-size:14px;" onclick="startChatWith('${u.username}')">💬 צ'אט</button>
+                            <button class="btn btn-danger" style="padding:8px 12px; font-size:14px; background:transparent; border:1px solid var(--danger); color:var(--danger);" onclick="openReportUserModal('${u.username}')">🚨 דווח</button>
+                        </div>
                     </div>
                 `;
             });
+        }
+
+        window.openReportUserModal = function(targetUser) {
+            reportingTargetUsername = targetUser;
+            document.getElementById('report-modal-target-label').innerText = `מדווח על המשתמש: ${targetUser}`;
+            document.getElementById('report-reason-input').value = "";
+            openModal('report-user-modal');
+        }
+
+        window.submitUserReportAction = async function() {
+            const reason = document.getElementById('report-reason-input').value.trim();
+            if(!reason) return alert("אנא הזן סיבה לדיווח.");
+
+            await addDoc(collection(db, "Reports"), {
+                type: 'UserReport',
+                targetUser: reportingTargetUsername,
+                reason: reason,
+                reporter: currentUser.username,
+                timestamp: new Date().toLocaleString('he-IL'),
+                status: 'Open'
+            });
+
+            await writeAuditLog("דיווח משתמש", `הגיש דיווח נגד ${reportingTargetUsername} מסיבה: ${reason}`);
+            alert("הדיווח נרשם במערכת ויועבר לטיפול האדמינים.");
+            closeModal('report-user-modal');
+        }
+
+        window.luckyRandomUser = function() {
+            if(allUsers.length === 0) return alert("אין משתמשים נוספים בקהילה כרגע.");
+            const randomIndex = Math.floor(Math.random() * allUsers.length);
+            const luckyUser = allUsers[randomIndex].username;
+            alert(`🎲 ההגרלה קבעה: אתה מתחיל שיחה עם ${luckyUser}!`);
+            startChatWith(luckyUser);
         }
 
         window.startChatWith = async function(targetUser) {
@@ -810,9 +932,11 @@
             const sidebar = document.getElementById('chats-threads');
             sidebar.innerHTML = "";
             
+            let hasChats = false;
             snap.forEach(d => {
                 const c = d.data();
                 if(c.participants.includes(currentUser.username)) {
+                    hasChats = true;
                     const partner = c.participants.find(p => p !== currentUser.username);
                     sidebar.innerHTML += `
                         <div class="chat-item" id="thread-${d.id}" onclick="openChatThread('${d.id}')">
@@ -821,6 +945,7 @@
                     `;
                 }
             });
+            if(!hasChats) sidebar.innerHTML = `<p style="padding:15px; color:var(--text-muted); font-size:14px;">אין שיחות פעילות.</p>`;
         }
 
         window.openChatThread = async function(id) {
@@ -830,7 +955,7 @@
             if(el) el.classList.add('active');
 
             const msgBox = document.getElementById('chat-msg-box');
-            msgBox.innerHTML = "טוען הודעות...";
+            msgBox.innerHTML = "טוען היסטוריית הודעות...";
 
             const snap = await getDocs(query(collection(db, `Chats/${id}/Messages`), orderBy("timestamp", "asc")));
             msgBox.innerHTML = "";
@@ -840,7 +965,6 @@
                 msgBox.innerHTML += `<div class="msg ${side}"><b>${m.sender}:</b><br>${m.text}</div>`;
             });
             msgBox.scrollTop = msgBox.scrollHeight;
-            document.getElementById('report-chat-btn').style.display = "block";
         }
 
         window.sendChatMsg = async function() {
@@ -858,22 +982,9 @@
             openChatThread(currentActiveChatId);
         }
 
-        window.reportCurrentChat = async function() {
-            if(!currentActiveChatId) return;
-            if(!confirm("האם ברצונך לדווח על שיחה זו לצוות הניהול?")) return;
-
-            await addDoc(collection(db, "Reports"), {
-                reportedChat: currentActiveChatId,
-                reporter: currentUser.username,
-                timestamp: new Date().toLocaleString(),
-                status: 'Open'
-            });
-            alert("הדיווח התקבל בשרת ויטופל בהקדם.");
-        }
-
         async function loadMatchesView() {
             const grid = document.getElementById('matches-grid');
-            grid.innerHTML = "מחשב התאמות קריאה מול משתמשי הקהילה...";
+            grid.innerHTML = "מחשב אחוזי התאמה ספרותיים בזמן אמת...";
             
             const snap = await getDocs(collection(db, "users"));
             const users = [];
@@ -888,7 +999,7 @@
 
                 Object.keys(currentUser.ratings).forEach(bId => {
                     if(u.ratings[bId] && Math.abs(currentUser.ratings[bId] - u.ratings[bId]) <= 2) {
-                        score += 25;
+                        score += 25; // הענקת 25% התאמה על כל ספר ששניהם דירגו קרוב
                     }
                 });
 
@@ -896,15 +1007,15 @@
                     matchFound = true;
                     grid.innerHTML += `
                         <div class="card" style="border-right: 5px solid var(--success);">
-                            <div class="card-title">🔥 התאמה עם ${u.username}!</div>
-                            <p>אחוז התאמה בטעם הספרותי: <b>${Math.min(score, 100)}%</b></p>
-                            <button class="btn btn-primary" style="margin-top:10px;" onclick="startChatWith('${u.username}')">שלח הודעה</button>
+                            <div class="card-title">🔥 התאמה ספרותית עם ${u.username}!</div>
+                            <p>אחוז התאמה במערכת: <b>${Math.min(score, 100)}%</b></p>
+                            <button class="btn btn-primary" style="margin-top:12px;" onclick="startChatWith('${u.username}')">שלח הודעה</button>
                         </div>
                     `;
                 }
             });
 
-            if(!matchFound) grid.innerHTML = "<p>דרג עוד ספרים כדי שהאלגוריתם ימצא לך חברים תואמים!</p>";
+            if(!matchFound) grid.innerHTML = "<p>דרג עוד ספרים במערכת כדי שנוכל למצוא חברים שתואמים לטעם שלך!</p>";
         }
 
         async function loadStatsView() {
@@ -914,34 +1025,70 @@
 
             const grid = document.getElementById('stats-grid');
             grid.innerHTML = `
-                <div class="card"><h3>👥 משתמשים רשומים</h3><h2>${uSnap.size}</h2></div>
-                <div class="card"><h3>📚 ספרים במערכת</h3><h2>${bSnap.size}</h2></div>
-                <div class="card"><h3>🚨 דיווחים פתוחים</h3><h2>${rSnap.size}</h2></div>
+                <div class="card"><h3>👥 קוראים רשומים בקהילה</h3><h2>${uSnap.size}</h2></div>
+                <div class="card"><h3>📚 ספרים רשומים במאגר</h3><h2>${bSnap.size}</h2></div>
+                <div class="card"><h3>🚨 פניות ותיקי דיווח פתוחים</h3><h2>${rSnap.size}</h2></div>
             `;
         }
 
         async function loadReportsView() {
             const container = document.getElementById('reports-container');
-            container.innerHTML = "טוען תיקים...";
+            container.innerHTML = "טוען דיווחים והצעות מהשרת...";
             const snap = await getDocs(collection(db, "Reports"));
             container.innerHTML = "";
 
+            if(snap.size === 0) container.innerHTML = "<p>הכל נקי! אין כרגע דיווחים או פניות פתוחות במערכת.</p>";
+
             snap.forEach(d => {
                 const r = d.data();
-                container.innerHTML += `
-                    <div class="card" style="margin-bottom:15px; border-right:4px solid var(--danger);">
-                        <h4>דיווח על צ'אט: ${r.reportedChat}</h4>
-                        <p>התקבל מאת: ${r.reporter} | סטטוס: <b>${r.status}</b></p>
-                        <button class="btn btn-danger" style="margin-top:10px; padding:5px 10px; font-size:12px;" onclick="closeReport('${d.id}')">סגור תיק דיווח</button>
-                    </div>
-                `;
+                if(r.type === 'UserReport') {
+                    container.innerHTML += `
+                        <div class="card" style="margin-bottom:15px; border-right:4px solid var(--danger);">
+                            <h4>🚨 דיווח משתמש: נגד ${r.targetUser}</h4>
+                            <p><b>התלונן:</b> ${r.reporter} | <b>סיבה:</b> ${r.reason}</p>
+                            <p style="font-size:12px; color:var(--text-muted); margin-top:5px;">זמן: ${r.timestamp}</p>
+                            <div style="display:flex; gap:10px; margin-top:10px;">
+                                <button class="btn btn-danger" style="padding:6px 12px; font-size:13px;" onclick="adminSuspendUser('${r.targetUser}', '${d.id}')">🚫 השעה משתמש</button>
+                                <button class="btn btn-secondary" style="padding:6px 12px; font-size:13px;" onclick="resolveReport('${d.id}')">✅ סגור פנייה (התעלם)</button>
+                            </div>
+                        </div>
+                    `;
+                } else if(r.type === 'BookSuggestion') {
+                    container.innerHTML += `
+                        <div class="card" style="margin-bottom:15px; border-right:4px solid var(--warning);">
+                            <h4>💡 הצעת ספר חדש מהקהילה</h4>
+                            <p><b>שם הספר:</b> ${r.bookTitle}</p>
+                            <p><b>תקציר:</b> ${r.bookDesc || 'אין'}</p>
+                            <p style="font-size:12px; color:var(--text-muted);">הוצע על ידי: ${r.reporter}</p>
+                            <div style="display:flex; gap:10px; margin-top:10px;">
+                                <button class="btn btn-success" style="padding:6px 12px; font-size:13px;" onclick="adminApproveBook('${r.bookTitle}', '${r.bookDesc}', '${d.id}')">✔️ אשר והוסף למאגר</button>
+                                <button class="btn btn-danger" style="padding:6px 12px; font-size:13px; background:transparent; border:1px solid var(--danger); color:var(--danger);" onclick="resolveReport('${d.id}')">❌ דחה הצעה</button>
+                            </div>
+                        </div>
+                    `;
+                }
             });
         }
 
-        window.closeReport = async function(id) {
+        window.resolveReport = async function(id) {
             await deleteDoc(doc(db, "Reports", id));
-            alert("תיק הדיווח נסגר ונמחק מהמערכת.");
+            alert("התיק נסגר ונמחק מרשימת הטיפול.");
             loadReportsView();
+        }
+
+        window.adminSuspendUser = async function(username, reportId) {
+            if(username === 'Book-U-Vers') return alert("פעולה חסומה. לא ניתן להשעות את הסופר-אדמין.");
+            await updateDoc(doc(db, "users", username), { isSuspended: true });
+            await writeAuditLog("השעיית משתמש", `אדמין השעה לצמיתות את החשבון של ${username}`);
+            alert(`המשתמש ${username} הושעה בהצלחה מהמערכת.`);
+            resolveReport(reportId);
+        }
+
+        window.adminApproveBook = async function(title, desc, reportId) {
+            await addDoc(collection(db, "books"), { title, description: desc, createdAt: Date.now() });
+            await writeAuditLog("אישור ספר", `אדמין אישר והוסיף את הספר "${title}" למאגר הכללי`);
+            alert(`הספר "${title}" התווסף רשמית למאגר הקהילתי!`);
+            resolveReport(reportId);
         }
 
         async function loadAdminsView() {
@@ -951,50 +1098,82 @@
 
             snap.forEach(d => {
                 const u = d.data();
-                if(['Admin', 'Admin+', 'SuperAdmin'].includes(u.role)) {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><b>${u.username}</b></td>
-                            <td>${u.role}</td>
-                            <td>
-                                <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="demoteUser('${u.username}')">הסר מניהול</button>
-                            </td>
-                        </tr>
-                    `;
-                }
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${u.username}</b></td>
+                        <td><span style="color:var(--accent); font-weight:bold;">${u.role}</span></td>
+                        <td>${u.isSuspended ? '🔴 מושעה' : '🟢 פעיל'}</td>
+                    </tr>
+                `;
             });
         }
 
         window.appointNewAdmin = async function() {
             const name = document.getElementById('new-admin-username').value.trim();
             const role = document.getElementById('new-admin-role').value;
-            if(!name) return;
+            if(!name) return alert("אנא הזן שם משתמש.");
+
+            if(name === 'Book-U-Vers') return alert("לא ניתן לשנות את הדרגה של הסופר-אדמין.");
 
             const ref = doc(db, "users", name);
             const check = await getDoc(ref);
-            if(!check.exists()) return alert("משתמש לא נמצא במערכת.");
+            if(!check.exists()) return alert("שם המשתמש שהזנת לא נמצא במערכת.");
 
             await updateDoc(ref, { role: role });
-            await writeAuditLog("ניהול צוות", `קידום המשתמש ${name} לדרגת ${role}`);
-            alert(`המשתמש ${name} מונה בהצלחה ל-${role}!`);
+            await writeAuditLog("ניהול דרגות", `שינה את הדרגה של המשתמש ${name} לדרגת ${role}`);
+            alert(`הדרגה של ${name} עודכנה בהצלחה ל-${role}!`);
+            document.getElementById('new-admin-username').value = "";
             loadAdminsView();
         }
 
-        window.demoteUser = async function(name) {
-            if(name === 'Book-U-Vers') return alert("לא ניתן להסיר את הסופר-אדמין.");
-            await updateDoc(doc(db, "users", name), { role: 'User' });
-            await writeAuditLog("ניהול צוות", `הסרת ניהול למשתמש ${name}`);
-            alert("המנהל הוסר והוחזר לדרגת משתמש רגיל.");
-            loadAdminsView();
+        async function loadSuperBooksView() {
+            const snap = await getDocs(collection(db, "books"));
+            const tbody = document.getElementById('super-books-table-body');
+            tbody.innerHTML = "";
+
+            snap.forEach(d => {
+                const b = d.data();
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${b.title}</b></td>
+                        <td style="font-size:12px; color:var(--text-muted);">${d.id}</td>
+                        <td>
+                            <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="superDeleteBook('${d.id}', '${b.title}')">🗑️ מחק לצמיתות</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.superAddBookDirectly = async function() {
+            const title = document.getElementById('super-book-title').value.trim();
+            const desc = document.getElementById('super-book-desc').value.trim();
+            if(!title) return alert("נא למלא שם ספר.");
+
+            await addDoc(collection(db, "books"), { title, description: desc, createdAt: Date.now() });
+            await writeAuditLog("ניהול סופר-ספרים", `הוסיף ספר ישירות למאגר העולמי: "${title}"`);
+            alert(`הספר "${title}" נוצר ישירות בתוך הדאטאבייס העולמי!`);
+            document.getElementById('super-book-title').value = "";
+            document.getElementById('super-book-desc').value = "";
+            loadSuperBooksView();
+        }
+
+        window.superDeleteBook = async function(id, title) {
+            if(!confirm(`⚠️ מחיקה קבועה! האם אתה בטוח שברצונך למחוק לצמיתות את הספר "${title}" מהמאגר העולמי? פעולה זו תמחק אותו לכל המשתמשים.`)) return;
+
+            await deleteDoc(doc(db, "books", id));
+            await writeAuditLog("ניהול סופר-ספרים", `מחק לצמיתות את הספר "${title}" מהדאטאבייס`);
+            alert("הספר נמחק ונעלם לחלוטין מהענן.");
+            loadSuperBooksView();
         }
 
         async function loadSystemLogsView() {
-            const snap = await getDocs(collection(db, "ActivityLogs"));
+            const snap = await getDocs(query(collection(db, "ActivityLogs"), orderBy("epoch", "desc")));
             const list = document.getElementById('system-audit-logs');
             list.innerHTML = "";
             snap.forEach(d => {
                 const l = d.data();
-                list.innerHTML += `<li class="log-item">⏱️ <b>[${l.timestamp}]</b> (${l.operator}) - <i>[${l.actionType}]</i> ${l.description}</li>`;
+                list.innerHTML += `<li class="log-item">⏱️ <b>[${l.timestamp}]</b> (${l.operator}) - <i style="color:var(--accent);">[${l.actionType}]</i> ${l.description}</li>`;
             });
         }
 
