@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookMatch Premium - רשת חברתית לספרים בענן</title>
+    <title>Book-U-Vers - רשת חברתית לספרים בענן</title>
     <style>
         :root, html[data-theme="dark"] {
             --bg-primary: #0f0f12;
@@ -17,6 +17,11 @@
             --success: #66bb6a;
             --warning: #ffa726;
             --border: #2a2a35;
+            
+            /* ניגודיות קשוחה */
+            --input-bg: #ffffff;
+            --input-text: #000000;
+            --card-text: #ffffff;
         }
 
         html[data-theme="light"] {
@@ -31,6 +36,11 @@
             --success: #388e3c;
             --warning: #f57c00;
             --border: #dbdbe7;
+            
+            /* ניגודיות קשוחה */
+            --input-bg: #16161a;
+            --input-text: #ffffff;
+            --card-text: #000000;
         }
 
         * {
@@ -44,7 +54,7 @@
         body {
             background-color: var(--bg-primary);
             color: var(--text-main);
-            overflow: hidden;
+            overflow-x: hidden;
             height: 100vh;
             width: 100vw;
             display: flex;
@@ -61,24 +71,29 @@
             background: linear-gradient(135deg, var(--bg-primary), var(--bg-surface));
             position: absolute;
             z-index: 999;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .auth-logo {
+            font-size: 56px;
+            font-weight: 900;
+            color: var(--accent);
+            margin-bottom: 20px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            letter-spacing: 2px;
+            text-align: center;
         }
 
         .auth-container {
             background-color: var(--bg-surface);
             padding: 35px;
             border-radius: 16px;
-            box-shadow: 0 12px 32px rgba(0,0,0,0.3);
-            width: 90%;
-            max-width: 420px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+            width: 100%;
+            max-width: 440px;
             border: 1px solid var(--border);
-        }
-
-        .auth-title {
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 26px;
-            font-weight: 800;
-            color: var(--accent);
+            color: var(--card-text);
         }
 
         .form-group {
@@ -96,12 +111,13 @@
         .form-group input, .form-group textarea, .form-group select {
             width: 100%;
             padding: 12px;
-            background-color: var(--bg-element);
-            border: 1px solid var(--border);
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            border: 2px solid var(--border);
             border-radius: 8px;
-            color: var(--text-main);
             font-size: 16px;
             outline: none;
+            font-weight: bold;
         }
 
         .form-group input:focus {
@@ -122,15 +138,13 @@
         }
 
         .btn-primary { background-color: var(--accent); color: white; }
-        .btn-primary:hover { background-color: var(--accent-hover); }
-        .btn-secondary { background-color: var(--bg-element); color: var(--text-main); border: 1px solid var(--border); }
+        .btn-secondary { background-color: var(--input-bg); color: var(--input-text); border: 1px solid var(--border); }
         .btn-danger { background-color: var(--danger); color: white; }
         .btn-success { background-color: var(--success); color: white; }
-        .btn-warning { background-color: var(--warning); color: white; }
 
         .btn-theme {
-            background-color: var(--bg-element);
-            color: var(--text-main);
+            background-color: var(--input-bg);
+            color: var(--input-text);
             border: 1px solid var(--border);
             padding: 10px;
             border-radius: 8px;
@@ -140,7 +154,7 @@
             width: 100%;
         }
 
-        /* מבנה ראשי של האפליקציה */
+        /* מבנה האפליקציה */
         #app-screen {
             display: none;
             width: 100vw;
@@ -151,7 +165,7 @@
         .sidebar {
             position: absolute;
             top: 0; bottom: 0; right: 0;
-            width: 260px;
+            width: 280px;
             background-color: var(--bg-surface);
             border-left: 1px solid var(--border);
             padding: 20px 15px;
@@ -162,7 +176,7 @@
         }
 
         .sidebar-brand {
-            font-size: 22px;
+            font-size: 26px;
             font-weight: 900;
             color: var(--accent);
             text-align: center;
@@ -196,11 +210,10 @@
 
         .sidebar-item.admin-badge { border-right: 4px solid var(--warning); }
         .sidebar-item.admin-plus-badge { border-right: 4px solid var(--accent); }
-        .sidebar-item.super-badge { border-right: 4px solid var(--danger); }
 
         .main-content {
             position: absolute;
-            top: 0; bottom: 0; left: 0; right: 260px;
+            top: 0; bottom: 0; left: 0; right: 280px;
             background-color: var(--bg-primary);
             overflow-y: auto;
             padding: 35px;
@@ -220,7 +233,7 @@
             align-items: center;
         }
 
-        /* כרטיסים וגריד */
+        /* גריד כרטיסים */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -232,8 +245,8 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            color: var(--card-text);
         }
 
         .card-title {
@@ -243,7 +256,6 @@
             margin-bottom: 10px;
         }
 
-        /* טבלאות */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -252,6 +264,7 @@
             border-radius: 12px;
             overflow: hidden;
             border: 1px solid var(--border);
+            color: var(--card-text);
         }
 
         th, td {
@@ -263,10 +276,62 @@
         th {
             background-color: var(--bg-element);
             color: var(--accent);
-            font-weight: 700;
         }
 
-        /* שיחות וצ'אט */
+        /* התאמה רספונסיבית מלאה לטלפונים */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                overflow-y: auto;
+            }
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                border-left: none;
+                border-bottom: 1px solid var(--border);
+                padding: 15px;
+            }
+            .sidebar-brand {
+                font-size: 22px;
+                margin-bottom: 10px;
+                padding-bottom: 5px;
+            }
+            .sidebar-menu {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .sidebar-item {
+                flex: 1 1 calc(50% - 10px);
+                font-size: 13px;
+                padding: 10px;
+                margin-bottom: 0;
+                justify-content: center;
+            }
+            .main-content {
+                position: relative;
+                right: 0;
+                width: 100%;
+                padding: 15px;
+                height: auto;
+            }
+            .view-title {
+                font-size: 24px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            .custom-filter-row {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+        }
+
+        /* מערכת צ'אט */
         .chat-container {
             display: grid;
             grid-template-columns: 320px 1fr;
@@ -276,56 +341,19 @@
             border-radius: 12px;
             overflow: hidden;
         }
-
-        .chat-sidebar {
-            border-left: 1px solid var(--border);
-            overflow-y: auto;
+        @media (max-width: 768px) {
+            .chat-container { grid-template-columns: 1fr; height: 450px; }
         }
 
-        .chat-item {
-            padding: 18px;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-        }
-
-        .chat-item:hover, .chat-item.active {
-            background-color: var(--bg-element);
-        }
-
-        .chat-main {
-            display: flex;
-            flex-direction: column;
-            background-color: var(--bg-primary);
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 25px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .msg {
-            max-width: 65%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 15px;
-            line-height: 1.4;
-        }
-
-        .msg.incoming { background-color: var(--bg-surface); align-self: flex-start; border: 1px solid var(--border); }
+        .chat-sidebar { border-left: 1px solid var(--border); overflow-y: auto; }
+        .chat-item { padding: 18px; border-bottom: 1px solid var(--border); cursor: pointer; color: var(--card-text); }
+        .chat-item:hover, .chat-item.active { background-color: var(--bg-element); }
+        .chat-main { display: flex; flex-direction: column; background-color: var(--bg-primary); }
+        .chat-messages { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .msg { max-width: 70%; padding: 12px 16px; border-radius: 12px; font-size: 15px; }
+        .msg.incoming { background-color: var(--bg-surface); color: var(--card-text); align-self: flex-start; border: 1px solid var(--border); }
         .msg.outgoing { background-color: var(--accent); color: white; align-self: flex-end; }
-        .msg.system { background-color: var(--bg-element); color: var(--text-muted); align-self: center; text-align: center; font-size: 13px; }
-
-        .chat-input-area {
-            padding: 20px;
-            background-color: var(--bg-surface);
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 15px;
-        }
+        .chat-input-area { padding: 20px; background-color: var(--bg-surface); border-top: 1px solid var(--border); display: flex; gap: 15px; }
 
         /* מודאלים */
         .modal {
@@ -336,44 +364,30 @@
             z-index: 200;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
-
         .modal-content {
             background-color: var(--bg-surface);
             padding: 35px;
             border-radius: 16px;
-            width: 90%;
+            width: 100%;
             max-width: 500px;
             border: 1px solid var(--border);
+            color: var(--card-text);
         }
-
-        /* רשימות לוגים */
-        .log-list {
-            list-style: none;
-            max-height: 400px;
-            overflow-y: auto;
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px;
-        }
-
-        .log-item {
-            padding: 10px;
-            border-bottom: 1px solid var(--border);
-            font-size: 14px;
-        }
+        .log-list { list-style: none; max-height: 300px; overflow-y: auto; background-color: var(--bg-surface); border: 1px solid var(--border); padding: 10px; color: var(--card-text); }
+        .log-item { padding: 8px; border-bottom: 1px solid var(--border); font-size: 14px; }
     </style>
 </head>
 <body>
 
     <div id="auth-screen">
+        <div class="auth-logo">Book-U-Vers</div>
         <div class="auth-container">
             <button class="btn-theme" onclick="toggleTheme()" id="auth-theme-btn">☀️ מצב בהיר</button>
-            <div class="auth-title" id="auth-panel-title">התחברות לקהילה</div>
             
             <div class="form-group">
-                <label>שם משתמש (השאר ריק אם אתה הסופר-אדמין):</label>
+                <label>שם משתמש (השאר ריק אם אתה סופר אדמין):</label>
                 <input type="text" id="auth-username" placeholder="הזן שם משתמש">
             </div>
             <div class="form-group">
@@ -382,8 +396,8 @@
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button class="btn btn-primary" onclick="handleAuth('login')">התחברות</button>
-                <button class="btn btn-secondary" onclick="handleAuth('register')">רישום חשבון חדש</button>
+                <button class="btn btn-primary" onclick="handleAuth('login')">התחברות למערכת</button>
+                <button class="btn btn-secondary" onclick="handleAuth('register')">רישום קורא חדש</button>
             </div>
         </div>
     </div>
@@ -391,117 +405,150 @@
     <div id="app-screen">
         <div class="sidebar">
             <div>
-                <div class="sidebar-brand">BookMatch v2.0</div>
+                <div class="sidebar-brand">Book-U-Vers</div>
                 <button class="btn-theme" onclick="toggleTheme()" id="sidebar-theme-btn">☀️ מצב בהיר</button>
                 <ul class="sidebar-menu">
-                    <li class="sidebar-item active" onclick="switchView('profile')">👤 הפרופיל שלי</li>
-                    <li class="sidebar-item" onclick="switchView('books')">📚 מאגר ספרים</li>
-                    <li class="sidebar-item" onclick="switchView('chats')">💬 שיחות והודעות</li>
-                    <li class="sidebar-item" onclick="switchView('matches')">🔥 התאמות קריאה</li>
-                    <li class="sidebar-item" onclick="switchView('users')">👥 קהילת משתמשים</li>
+                    <li class="sidebar-item active" id="menu-profile" onclick="switchView('profile')">👤 הפרופיל שלי</li>
+                    <li class="sidebar-item" id="menu-books" onclick="switchView('books')">📚 מאגר ספרים</li>
+                    <li class="sidebar-item" id="menu-chats" onclick="switchView('chats')">💬 שיחות והודעות</li>
+                    <li class="sidebar-item" id="menu-matches" onclick="switchView('matches')">🔥 התאמות קריאה</li>
+                    <li class="sidebar-item" id="menu-users" onclick="switchView('users')">👥 קהילת משתמשים</li>
                     
                     <li class="sidebar-item admin-badge" id="menu-stats" style="display:none;" onclick="switchView('stats')">📊 סטטיסטיקות</li>
-                    <li class="sidebar-item admin-badge" id="menu-reports" style="display:none;" onclick="switchView('reports')">🚨 תיקי דיווחים</li>
-                    <li class="sidebar-item admin-plus-badge" id="menu-admins" style="display:none;" onclick="switchView('admins')">🛠️ ניהול צוות אדמין</li>
+                    <li class="sidebar-item admin-badge" id="menu-reports" style="display:none;" onclick="switchView('reports')">🚨 דיווחים</li>
+                    <li class="sidebar-item admin-plus-badge" id="menu-admins" style="display:none;" onclick="switchView('admins')">🛠️ צוות ניהול</li>
+                    <li class="sidebar-item admin-plus-badge" id="menu-super-books" style="display:none;" onclick="switchView('super-books')">👑 ניהול ספרים (סופר)</li>
                     <li class="sidebar-item admin-plus-badge" id="menu-logs" style="display:none;" onclick="switchView('logs')">📜 יומן מערכת</li>
                 </ul>
             </div>
-            <button class="btn btn-danger" onclick="logout()" style="width:100%;">🚪 התנתקות</button>
+            <button class="btn btn-danger" onclick="logout()" style="width:100%; margin-top: 15px;">🚪 התנתקות</button>
         </div>
 
         <div class="main-content">
             
             <div id="view-profile" class="view-section active">
                 <div class="view-title"><span>הפרופיל שלי</span></div>
-                <div class="card" style="max-width: 600px;">
+                <div class="card" style="max-width: 600px; margin: 0 auto;">
                     <div class="form-group">
-                        <label>שם משתמש:</label>
+                        <label>שם המשתמש המחובר:</label>
                         <input type="text" id="prof-username" readonly>
                     </div>
                     <div class="form-group">
-                        <label>סיסמה חדשה (אם ברצונך לשנות):</label>
-                        <input type="password" id="prof-password" placeholder="הקלד סיסמה חדשה">
+                        <label>שינוי סיסמה:</label>
+                        <input type="password" id="prof-password" placeholder="הזן סיסמה חדשה">
                     </div>
                     <p style="margin-bottom: 15px; font-size:14px; color:var(--text-muted);" id="prof-meta"></p>
                     <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-primary" onclick="saveProfileChanges()">שמור שינויים</button>
-                        <button class="btn btn-danger" onclick="deleteAccountAction()">מחק חשבון לצמיתות</button>
+                        <button class="btn btn-primary" onclick="saveProfileChanges()">עדכן סיסמה</button>
+                        <button class="btn btn-danger" id="delete-own-acc-btn" onclick="deleteAccountAction()">מחק חשבון לצמיתות</button>
                     </div>
-                    <h3 style="margin-top:25px; margin-bottom:10px;">היסטוריית פעילות אישית</h3>
+                    <h3 style="margin-top:25px; margin-bottom:10px;">היסטוריית הפעולות שלך</h3>
                     <ul class="log-list" id="personal-logs"></ul>
                 </div>
             </div>
 
             <div id="view-books" class="view-section">
                 <div class="view-title">
-                    <span>מאגר הספרים</span>
-                    <button class="btn btn-success" onclick="openModal('suggest-book-modal')">➕ הצע ספר חדש</button>
+                    <span>מאגר הספרים העולמי</span>
+                    <button class="btn btn-success" id="suggest-book-btn" onclick="openModal('suggest-book-modal')">➕ הצע ספר חדש</button>
                 </div>
                 <div class="cards-grid" id="books-grid"></div>
             </div>
 
+            <div id="view-super-books" class="view-section">
+                <div class="view-title"><span>👑 פאנל ניהול ספרים רשמי (סופר אדמין)</span></div>
+                <div class="card" style="margin-bottom: 30px;">
+                    <h3>הוספת ספר חדש למערכת מאפס</h3>
+                    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+                        <div class="form-group" style="margin:0;">
+                            <input type="text" id="super-add-title" placeholder="שם הספר">
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <textarea id="super-add-desc" placeholder="תקציר ותיאור הספר" rows="3"></textarea>
+                        </div>
+                        <button class="btn btn-success" onclick="superAddBookDirectly()">פרסם ספר למאגר</button>
+                    </div>
+                </div>
+                <h3>הסרת ספרים ממאגר המערכת</h3>
+                <div class="cards-grid" id="super-books-list-grid" style="margin-top:15px;"></div>
+            </div>
+
             <div id="view-chats" class="view-section">
-                <div class="view-title"><span>תיבת שיחות</span></div>
+                <div class="view-title"><span>תיבת הודעות</span></div>
                 <div class="chat-container">
                     <div class="chat-sidebar" id="chats-threads"></div>
                     <div class="chat-main">
-                        <div class="chat-messages" id="chat-msg-box">בחר שיחה כדי להתחיל להתכתב</div>
+                        <div class="chat-messages" id="chat-msg-box">אנא בחר שיחה פעילה מהרשימה</div>
                         <div class="chat-input-area">
-                            <input type="text" id="chat-input-msg" placeholder="הקלד הודעה..." style="flex:1; padding:12px; background:var(--bg-element); border:1px solid var(--border); color:white;">
+                            <input type="text" id="chat-input-msg" placeholder="הקלד הודעה פרטית..." style="flex:1; padding:12px; background:var(--input-bg); border:1px solid var(--border); color:var(--input-text); font-weight: bold; border-radius: 8px;">
                             <button class="btn btn-primary" onclick="sendChatMsg()">שלח</button>
-                            <button class="btn btn-danger" id="report-chat-btn" style="display:none;" onclick="reportCurrentChat()">🚨 דווח</button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="view-matches" class="view-section">
-                <div class="view-title"><span>התאמות לפי טעם קריאה</span></div>
+                <div class="view-title"><span>הקוראים המתאימים ביותר לפרופיל שלך</span></div>
                 <div class="cards-grid" id="matches-grid"></div>
             </div>
 
             <div id="view-users" class="view-section">
                 <div class="view-title">
                     <span>קהילת הקוראים</span>
-                    <button class="btn btn-secondary" onclick="luckyRandomUser()">🎲 קורא אקראי</button>
+                    <button class="btn btn-secondary" id="lucky-user-btn" onclick="luckyRandomUser()">🎲 קורא אקראי</button>
                 </div>
-                <div style="display:flex; gap:15px; margin-bottom:20px;">
-                    <input type="text" id="user-search" class="form-group" style="margin:0; flex:1;" placeholder="🔍 חפש לפי שם משתמש..." oninput="renderUsersView()">
-                    <input type="number" id="rating-search-min" class="form-group" style="margin:0; width:180px;" placeholder="⭐ ציון ספר מינימלי" oninput="renderUsersView()">
+                <div class="custom-filter-row" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; margin-bottom:25px;">
+                    <div class="form-group" style="margin:0;">
+                        <input type="text" id="user-search" placeholder="🔍 חפש לפי שם משתמש...">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <input type="text" id="book-title-search" placeholder="📘 שם ספר ספציפי לחיפוש...">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <input type="number" id="rating-search-min" placeholder="⭐ דירוג ספציפי מינימלי (1-10)" min="1" max="10">
+                    </div>
                 </div>
+                <div style="margin-bottom:15px;"><button class="btn btn-primary" onclick="renderUsersView()">בצע סינון מתקדם</button></div>
                 <div class="cards-grid" id="users-grid"></div>
             </div>
 
             <div id="view-stats" class="view-section">
-                <div class="view-title"><span>סטטיסטיקות מערכת מקיפות</span></div>
+                <div class="view-title"><span>סטטיסטיקות שימוש ופעילות</span></div>
                 <div class="cards-grid" id="stats-grid"></div>
             </div>
 
             <div id="view-reports" class="view-section">
-                <div class="view-title"><span>תיקי טיפול בדיווחים</span></div>
-                <div id="reports-container"></div>
+                <div class="view-title"><span>תיקי דיווחים פתוחים לטיפול</span></div>
+                <div id="reports-container" class="cards-grid"></div>
             </div>
 
             <div id="view-admins" class="view-section">
-                <div class="view-title"><span>ניהול ומינוי צוות אדמינים</span></div>
+                <div class="view-title"><span>ניהול צוות אדמינים במערכת</span></div>
                 <div class="card" style="margin-bottom:25px;">
-                    <h3>מינוי אדמין חדש במערכת</h3>
-                    <div style="display:flex; gap:10px; margin-top:15px;">
-                        <input type="text" id="new-admin-username" style="flex:1; padding:10px; background:var(--bg-element); border:1px solid var(--border); color:white; border-radius:6px;" placeholder="שם משתמש למינוי">
-                        <select id="new-admin-role" style="width:180px; padding:10px; background:var(--bg-element); border:1px solid var(--border); color:white; border-radius:6px;">
-                            <option value="Admin">Admin</option>
-                            <option value="Admin+">Admin+</option>
-                        </select>
-                        <button class="btn btn-success" onclick="appointNewAdmin()">מנה ואשר דרגה</button>
+                    <h3>יצירת חשבון אדמין חדש (לא שדרוג קיים)</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:15px;" class="custom-filter-row">
+                        <div class="form-group" style="margin:0;">
+                            <input type="text" id="new-admin-username" placeholder="שם משתמש חדש">
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <input type="password" id="new-admin-password" placeholder="סיסמה לחשבון">
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <select id="new-admin-role">
+                                <option value="Admin">Admin</option>
+                                <option value="Admin+">Admin+</option>
+                            </select>
+                        </div>
                     </div>
+                    <button class="btn btn-success" style="margin-top:15px; width:100%;" onclick="createNewAdminAccount()">ייצר חשבון אדמין מורשה</button>
                 </div>
                 <table>
                     <thead>
                         <tr>
                             <th>שם משתמש</th>
-                            <th>דרגה נוכחית</th>
-                            <th>עומס תיקים</th>
-                            <th>פעולות קביעת דרג</th>
+                            <th>דרגה</th>
+                            <th>עומס תיקי דיווח</th>
+                            <th>פעולות שינוי דרג</th>
                         </tr>
                     </thead>
                     <tbody id="admins-table-body"></tbody>
@@ -509,8 +556,8 @@
             </div>
 
             <div id="view-logs" class="view-section">
-                <div class="view-title"><span>יומן פעילות מערכת מאובטח (Audit Log)</span></div>
-                <ul class="log-list" id="system-audit-logs" style="max-height:600px;"></ul>
+                <div class="view-title"><span>יומן פעילות מאובטח (Audit Log)</span></div>
+                <ul class="log-list" id="system-audit-logs" style="max-height:550px;"></ul>
             </div>
 
         </div>
@@ -520,45 +567,49 @@
         <div class="modal-content">
             <h2 id="modal-book-title" class="card-title">שם הספר</h2>
             <p id="modal-book-desc" style="margin-bottom:15px; color:var(--text-muted);"></p>
-            <div id="modal-book-stats" style="margin-bottom:20px; font-weight:bold;"></div>
-            <div class="form-group">
-                <label>הדירוג שלך לספר זה (1 עד 10):</label>
-                <select id="my-book-rating">
-                    <option value="0">לא קראתי / ללא דירוג</option>
-                    <option value="1">1 - גרוע ביותר</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5 - בינוני</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8 - טוב מאוד</option>
-                    <option value="9">9</option>
-                    <option value="10">10 - יצירת מופת</option>
-                </select>
+            
+            <div id="admin-rating-block-message" style="display:none; color:var(--danger); font-weight:bold; margin-bottom:15px;">
+                🚫 מנהלים וחשבונות פיקוח אינם מורשים לדרג ספרים במערכת.
             </div>
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-primary" onclick="submitBookRating()">שמור דירוג קריאה</button>
-                <button class="btn btn-secondary" onclick="closeModal('book-detail-modal')">סגור חלון</button>
+            <div id="rating-form-controls">
+                <div class="form-group">
+                    <label>הדירוג שלך לספר זה (1-10):</label>
+                    <select id="my-book-rating">
+                        <option value="0">ללא דירוג / לא קראתי</option>
+                        <option value="1">1 - גרוע ביותר</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5 - בינוני</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8 - מעולה</option>
+                        <option value="9">9</option>
+                        <option value="10">10 - יצירת מופת</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="submitBookRating()">שמור את הדירוג שלי</button>
             </div>
-            <h3 style="margin-top:20px; margin-bottom:10px;">דירוגי קוראים אחרים:</h3>
+            
+            <button class="btn btn-secondary" onclick="closeModal('book-detail-modal')" style="margin-top:10px; width:100%;">סגור חלון</button>
+            <h3 style="margin-top:20px; margin-bottom:10px;">מה הקהילה חושבת על הספר:</h3>
             <div id="modal-book-reviews" style="max-height:150px; overflow-y:auto; font-size:14px;"></div>
         </div>
     </div>
 
     <div id="suggest-book-modal" class="modal">
         <div class="modal-content">
-            <h2>הצעת ספר חדש למאגר העולמי</h2>
+            <h2>הצעת ספר למנהלי המערכת</h2>
             <div class="form-group" style="margin-top:15px;">
-                <label>שם הספר:</label>
+                <label>שם הספר המומלץ:</label>
                 <input type="text" id="suggest-title">
             </div>
             <div class="form-group">
-                <label>תיאור קצר / תקציר:</label>
-                <textarea id="suggest-desc" rows="3" style="width:100%; padding:10px; background:var(--bg-element); border:1px solid var(--border); color:white; border-radius:8px CONTAINER;"></textarea>
+                <label>תקציר או תיאור קצר:</label>
+                <textarea id="suggest-desc" rows="3"></textarea>
             </div>
             <div style="display:flex; gap:10px;">
-                <button class="btn btn-success" onclick="submitBookSuggestion()">שלח הצעה לאישור</button>
+                <button class="btn btn-success" onclick="submitBookSuggestion()">שלח הצעה</button>
                 <button class="btn btn-secondary" onclick="closeModal('suggest-book-modal')">ביטול</button>
             </div>
         </div>
@@ -568,7 +619,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { 
             getFirestore, collection, doc, setDoc, getDoc, getDocs, 
-            updateDoc, deleteDoc, query, where, orderBy, addDoc 
+            updateDoc, deleteDoc, query, where, orderBy, addDoc, onSnapshot
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -584,9 +635,17 @@
         const db = getFirestore(app);
 
         let currentUser = null;
-        let activeThreadId = null;
         let selectedBookId = null;
-        let fakeUserIP = "192.168.1.10"; 
+        let activeChatRecipient = null;
+        let chatUnsubscribe = null;
+
+        function isUserAdmin() {
+            return currentUser && ['Admin', 'Admin+', 'SuperAdmin'].includes(currentUser.role);
+        }
+
+        function isSuperAdmin() {
+            return currentUser && currentUser.role === 'SuperAdmin';
+        }
 
         async function cryptoHash(password, username) {
             const salt = username.toLowerCase() + "_bookmatch_secure_salt_2026";
@@ -598,266 +657,308 @@
         }
 
         function initAppTheme() {
-            const saved = localStorage.getItem('bm_theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+            const saved = localStorage.getItem('bm_theme') || 'dark';
             document.documentElement.setAttribute('data-theme', saved);
             updateThemeUIComponents(saved);
         }
+        
         window.toggleTheme = function() {
             const current = document.documentElement.getAttribute('data-theme');
             const target = current === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', target);
             localStorage.setItem('bm_theme', target);
-            if(currentUser) updateDoc(doc(db, "users", currentUser.username), { preferedTheme: target });
             updateThemeUIComponents(target);
         }
+        
         function updateThemeUIComponents(t) {
             const str = t === 'dark' ? '☀️ מצב בהיר' : '🌙 מצב כהה';
-            document.getElementById('auth-theme-btn').innerText = str;
-            document.getElementById('sidebar-theme-btn').innerText = str;
+            const b1 = document.getElementById('auth-theme-btn');
+            const b2 = document.getElementById('sidebar-theme-btn');
+            if(b1) b1.innerText = str;
+            if(b2) b2.innerText = str;
+        }
+
+        window.openModal = function(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        window.closeModal = function(id) {
+            document.getElementById(id).style.display = 'none';
         }
 
         window.switchView = function(viewId) {
+            if (viewId === 'matches' && isUserAdmin()) {
+                alert("מנהלי מערכת אינם משתתפים במערך התאמות הקריאה החברתי.");
+                return;
+            }
+            
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
             
             const targetView = document.getElementById('view-' + viewId);
             if(targetView) targetView.classList.add('active');
             
+            const menuItem = document.getElementById('menu-' + viewId);
+            if(menuItem) menuItem.classList.add('active');
+            
+            if(viewId === 'profile') renderProfileView();
             if(viewId === 'books') renderBooksView();
-            if(viewId === 'chats') renderChatsView();
-            if(viewId === 'matches') renderMatchesView();
+            if(viewId === 'super-books') renderSuperBooksManagementView();
             if(viewId === 'users') renderUsersView();
+            if(viewId === 'admins') renderAdminsView();
+            if(viewId === 'matches') renderMatchesView();
+            if(viewId === 'chats') renderChatsView();
             if(viewId === 'stats') renderStatsView();
             if(viewId === 'reports') renderReportsView();
-            if(viewId === 'admins') renderAdminsView();
-            if(viewId === 'logs') renderAuditLogsView();
+            if(viewId === 'logs') renderSystemAuditLogsView();
         }
 
         async function writeAuditLog(actionType, detailDescription) {
-            await addDoc(collection(db, "ActivityLogs"), {
-                timestamp: new Date().toLocaleString('he-IL'),
-                epoch: Date.now(),
-                operator: currentUser ? currentUser.username : "System/Guest",
-                actionType: actionType,
-                description: detailDescription
-            });
+            try {
+                await addDoc(collection(db, "ActivityLogs"), {
+                    timestamp: new Date().toLocaleString('he-IL'),
+                    epoch: Date.now(),
+                    operator: currentUser ? currentUser.username : "System/Guest",
+                    actionType: actionType,
+                    description: detailDescription
+                });
+            } catch(e) { console.error("Error writing audit log:", e); }
         }
 
         window.handleAuth = async function(type) {
             const user = document.getElementById('auth-username').value.trim();
             const pass = document.getElementById('auth-password').value;
             
-            if(!pass) return alert("נא למלא סיסמה.");
-
-            const isSuperAdminName = (user.toLowerCase() === 'book-u-vers'.toLowerCase());
+            if(!pass) return alert("נא להזין סיסמה אבטחתית.");
+            const isSuperAdminName = (user.toLowerCase() === 'book-u-vers'.toLowerCase() || user === '');
 
             if(type === 'register') {
-                if(!user) return alert("נא למלא שם משתמש.");
+                if(!user || isSuperAdminName) return alert("שם משתמש תפוס או לא חוקי.");
                 
-                if(isSuperAdminName) {
-                    const superCheck = await getDoc(doc(db, "users", "Book-U-Vers"));
-                    if(superCheck.exists()) {
-                        return alert("שגיאה: השם Book-U-Vers שמור לסופר-אדמין בלבד והחשבון כבר קיים!");
-                    }
-                }
+                const userCheck = await getDoc(doc(db, "users", user));
+                if(userCheck.exists()) return alert("שם משתמש זה כבר רשום במערכת.");
 
-                if(pass.length < 6) return alert("אבטחה: הסיסמה חייבת להכיל לפחות 6 תווים.");
                 const passHash = await cryptoHash(pass, user);
-
-                const rateCheck = await getDoc(doc(db, "RateLimits", fakeUserIP));
-                if(rateCheck.exists() && !isSuperAdminName) { 
-                    const lastReg = rateCheck.data().timestamp;
-                    if(Date.now() - lastReg < 5 * 60 * 60 * 1000) {
-                        return alert("אבטחת מערכת: ניתן לפתוח חשבון אחד בלבד כל 5 שעות מכתובת IP זו.");
-                    }
-                }
-
                 const newUserObj = {
-                    username: isSuperAdminName ? "Book-U-Vers" : user,
-                    passwordHash: passHash,
-                    role: isSuperAdminName ? 'SuperAdmin' : 'User',
-                    joinedAt: new Date().toLocaleDateString('he-IL'),
-                    lastSeen: new Date().toLocaleString('he-IL'),
-                    preferedTheme: document.documentElement.getAttribute('data-theme'),
-                    isSuspended: false
+                    username: user, passwordHash: passHash, role: 'User',
+                    joinedAt: new Date().toLocaleDateString('he-IL'), isSuspended: false,
+                    ratings: {}
                 };
-
-                await setDoc(doc(db, "users", newUserObj.username), newUserObj);
-                if(!isSuperAdminName) await setDoc(doc(doc(db, "RateLimits", fakeUserIP)), { timestamp: Date.now() });
-                
-                alert(`החשבון ${newUserObj.username} נוצר בהצלחה בענן! כעת בצע התחברות.`);
+                await setDoc(doc(db, "users", user), newUserObj);
+                await writeAuditLog("REGISTER", `משתמש חדש נרשם: ${user}`);
+                alert("הרשמתך כקורא בוצעה בהצלחה!");
             } 
-            
             else if(type === 'login') {
-                let targetUser = user;
-                if(!user || isSuperAdminName) {
-                    targetUser = "Book-U-Vers";
+                let targetUser = isSuperAdminName ? "Book-U-Vers" : user;
+
+                let userSnap = await getDoc(doc(db, "users", targetUser));
+                
+                // אתחול סופר אדמין ראשוני במידה ואינו קיים בבסיס הנתונים
+                if(!userSnap.exists() && targetUser === "Book-U-Vers") {
+                    const passHash = await cryptoHash(pass, "Book-U-Vers");
+                    await setDoc(doc(db, "users", "Book-U-Vers"), {
+                        username: "Book-U-Vers", passwordHash: passHash, role: 'SuperAdmin',
+                        joinedAt: new Date().toLocaleDateString('he-IL'), isSuspended: false
+                    });
+                    userSnap = await getDoc(doc(db, "users", "Book-U-Vers"));
                 }
 
-                const userRef = doc(db, "users", targetUser);
-                const userSnap = await getDoc(userRef);
-                
-                if(!userSnap.exists()) return alert("המשתמש אינו קיים במערכת. יש לבצע רישום תחילה.");
+                if(!userSnap.exists()) return alert("החשבון לא נמצא במערכת.");
                 
                 const passHash = await cryptoHash(pass, targetUser);
                 const userData = userSnap.data();
                 
                 if(userData.passwordHash !== passHash) return alert("סיסמה שגויה.");
-                if(userData.isSuspended) return alert("חשבון זה מושעה.");
+                if(userData.isSuspended) return alert("חשבון זה הושעה זמנית.");
 
                 currentUser = userData;
-                await updateDoc(userRef, { lastSeen: new Date().toLocaleString('he-IL') });
+                if(!currentUser.ratings) currentUser.ratings = {};
                 
                 setupRoleBasedUI();
-                
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('app-screen').style.display = 'block';
-                
-                if(currentUser.preferedTheme) {
-                    document.documentElement.setAttribute('data-theme', currentUser.preferedTheme);
-                    updateThemeUIComponents(currentUser.preferedTheme);
-                }
-
-                loadPersonalLogs();
                 switchView('profile');
+                await writeAuditLog("LOGIN", `משתמש התחבר: ${currentUser.username} (${currentUser.role})`);
             }
         }
 
         function setupRoleBasedUI() {
             const role = currentUser.role;
-            if(role === 'Admin' || role === 'Admin+' || role === 'SuperAdmin') {
-                document.getElementById('menu-stats').style.display = 'flex';
-                document.getElementById('menu-reports').style.display = 'flex';
+            const isAdmin = isUserAdmin();
+
+            if (isAdmin) {
+                document.getElementById('menu-matches').style.display = 'none';
+                document.getElementById('suggest-book-btn').style.display = 'none';
+                document.getElementById('delete-own-acc-btn').style.display = 'none';
+                document.getElementById('lucky-user-btn').style.display = 'none';
+            } else {
+                document.getElementById('menu-matches').style.display = 'flex';
+                document.getElementById('suggest-book-btn').style.display = 'block';
+                document.getElementById('delete-own-acc-btn').style.display = 'block';
+                document.getElementById('lucky-user-btn').style.display = 'block';
             }
-            if(role === 'Admin+' || role === 'SuperAdmin') {
-                document.getElementById('menu-admins').style.display = 'flex';
-                document.getElementById('menu-logs').style.display = 'flex';
-            }
-            
+
+            document.getElementById('menu-stats').style.display = (role === 'Admin' || role === 'Admin+' || role === 'SuperAdmin') ? 'flex' : 'none';
+            document.getElementById('menu-reports').style.display = (role === 'Admin' || role === 'Admin+' || role === 'SuperAdmin') ? 'flex' : 'none';
+            document.getElementById('menu-admins').style.display = (role === 'Admin+' || role === 'SuperAdmin') ? 'flex' : 'none';
+            document.getElementById('menu-super-books').style.display = (role === 'SuperAdmin') ? 'flex' : 'none';
+            document.getElementById('menu-logs').style.display = (role === 'Admin+' || role === 'SuperAdmin') ? 'flex' : 'none';
+        }
+
+        window.logout = function() {
+            writeAuditLog("LOGOUT", `משתמש התנתק: ${currentUser.username}`);
+            currentUser = null;
+            if(chatUnsubscribe) chatUnsubscribe();
+            document.getElementById('app-screen').style.display = 'none';
+            document.getElementById('auth-screen').style.display = 'flex';
+            document.getElementById('auth-username').value = '';
+            document.getElementById('auth-password').value = '';
+        }
+
+        // --- פרופיל משתמש ---
+        async function renderProfileView() {
             document.getElementById('prof-username').value = currentUser.username;
-            document.getElementById('prof-meta').innerText = `דרגת הרשאה: ${currentUser.role} | תאריך הצטרפות: ${currentUser.joinedAt}`;
+            document.getElementById('prof-password').value = '';
+            document.getElementById('prof-meta').innerText = `דרגת הרשאה: ${currentUser.role} | תאריך הצטרפות: ${currentUser.joinedAt || 'לא ידוע'}`;
+            
+            const q = query(collection(db, "ActivityLogs"), where("operator", "==", currentUser.username), orderBy("epoch", "desc"));
+            const snap = await getDocs(q);
+            const container = document.getElementById('personal-logs');
+            container.innerHTML = '';
+            snap.forEach(d => {
+                const log = d.data();
+                const li = document.createElement('li');
+                li.className = 'log-item';
+                li.innerText = `[${log.timestamp}] ${log.actionType}: ${log.description}`;
+                container.appendChild(li);
+            });
         }
 
         window.saveProfileChanges = async function() {
             const newPass = document.getElementById('prof-password').value;
-            let updates = {};
+            if(!newPass) return alert("אנא הזן סיסמה חדשה תקנית.");
             
-            if(newPass.length >= 6) {
-                updates.passwordHash = await cryptoHash(newPass, currentUser.username);
-                await updateDoc(doc(db, "users", currentUser.username), updates);
-                alert("הסיסמה עודכנה ושמורה בבטחה בענן.");
-                document.getElementById('prof-password').value = "";
-            } else if (newPass.length > 0) {
-                return alert("הסיסמה החדשה חייבת להיות לפחות 6 תווים.");
-            } else {
-                alert("לא בוצע שינוי (שם המשתמש קבוע מטעמי קישור נתונים).");
-            }
+            const newHash = await cryptoHash(newPass, currentUser.username);
+            await updateDoc(doc(db, "users", currentUser.username), { passwordHash: newHash });
+            currentUser.passwordHash = newHash;
+            alert("הסיסמה עודכנה בהצלחה במאגר המאובטח!");
+            await writeAuditLog("PASSWORD_CHANGE", "המשתמש שינה את סיסמת הכניסה שלו.");
+            renderProfileView();
         }
 
         window.deleteAccountAction = async function() {
-            if(currentUser.role === 'SuperAdmin') return alert("אבטחת מערכת: לא ניתן למחוק את חשבון ה-SuperAdmin הראשי.");
-            if(!confirm("האם אתה בטוח לחלוטין? החשבון יימחק מהמערכת.")) return;
-
-            await writeAuditLog("ניהול משתמשים", `המשתמש ${currentUser.username} מחק את החשבון של עצמו.`);
+            if(isUserAdmin()) return alert("לא ניתן למחוק חשבונות ניהול באופן ישיר.");
+            if(!confirm("האם אתה בטוח שברצונך למחוק את החשבון לצמיתות? פעולה זו אינה ניתנת לביטול.")) return;
+            
+            await writeAuditLog("ACCOUNT_DELETE", `המשתמש מחק את עצמו: ${currentUser.username}`);
             await deleteDoc(doc(db, "users", currentUser.username));
+            alert("חשבונך הוסר בהצלחה.");
             logout();
         }
 
-        async function loadPersonalLogs() {
-            const qSnap = await getDocs(query(collection(db, "ActivityLogs"), where("operator", "==", currentUser.username)));
-            const container = document.getElementById('personal-logs');
-            container.innerHTML = "";
-            qSnap.forEach(doc => {
-                container.innerHTML += `<li class="log-item"><b>[${doc.data().timestamp}]</b> ${doc.data().description}</li>`;
-            });
-        }
-
-        window.logout = function() {
-            currentUser = null;
-            document.getElementById('app-screen').style.display = 'none';
-            document.getElementById('auth-screen').style.display = 'flex';
-            document.getElementById('auth-username').value = "";
-            document.getElementById('auth-password').value = "";
-            
-            document.getElementById('menu-stats').style.display = 'none';
-            document.getElementById('menu-reports').style.display = 'none';
-            document.getElementById('menu-admins').style.display = 'none';
-            document.getElementById('menu-logs').style.display = 'none';
-        }
-
+        // --- מאגר ספרים ---
         async function renderBooksView() {
+            const snap = await getDocs(collection(db, "books"));
             const grid = document.getElementById('books-grid');
-            grid.innerHTML = "טוען מאגר ספרים מהענן...";
+            grid.innerHTML = '';
             
-            const booksSnap = await getDocs(collection(db, "Books"));
-            const ratingsSnap = await getDocs(collection(db, "Ratings"));
-            const allUsersSnap = await getDocs(collection(db, "users"));
-            const totalUsersCount = allUsersSnap.size || 1;
+            snap.forEach(d => {
+                const book = d.data();
+                const id = d.id;
+                
+                // חישוב ממוצע דירוגים
+                let avgText = "אין דירוגים";
+                if(book.ratingsCount && book.ratingsCount > 0) {
+                    avgText = `⭐ ${(book.ratingsSum / book.ratingsCount).toFixed(1)} (${book.ratingsCount} מדרגים)`;
+                }
 
-            grid.innerHTML = "";
-            booksSnap.forEach(bDoc => {
-                const book = bDoc.data();
-                const bId = bDoc.id;
-
-                let bookRatings = [];
-                ratingsSnap.forEach(rDoc => {
-                    if(rDoc.data().bookId === bId) bookRatings.push(rDoc.data().score);
-                });
-
-                const avg = bookRatings.length ? (bookRatings.reduce((a,b)=>a+b, 0) / bookRatings.length).toFixed(1) : "ללא";
-                const readPct = ((bookRatings.length / totalUsersCount) * 100).toFixed(0);
-
-                grid.innerHTML += `
-                    <div class="card">
-                        <div class="card-title">${book.title}</div>
-                        <p style="color:var(--text-muted); font-size:14px; margin-bottom:15px;">${book.desc}</p>
-                        <div style="font-size:13px; font-weight:bold; margin-bottom:15px;">⭐ ציון ממוצע: ${avg} | 📖 נקרא ע"י: ${readPct}% מהקהילה</div>
-                        <button class="btn btn-primary" onclick="openBookDetail('${bId}')">פתח דף ספר ודרג</button>
-                    </div>
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-title">${book.title}</div>
+                    <p style="font-size:14px; margin-bottom:10px; color:var(--text-muted);">${book.description || ''}</p>
+                    <div style="font-weight:bold; color:var(--warning); margin-bottom:15px;">${avgText}</div>
+                    <button class="btn btn-primary" onclick="viewBookDetails('${id}')">פרטים ודירוג</button>
                 `;
+                grid.appendChild(card);
             });
         }
 
-        window.openBookDetail = async function(id) {
+        window.viewBookDetails = async function(id) {
             selectedBookId = id;
-            const bDoc = await getDoc(doc(db, "Books", id));
-            if(!bDoc.exists()) return;
-            
-            const book = bDoc.data();
-            document.getElementById('modal-book-title').innerText = book.title;
-            document.getElementById('modal-book-desc').innerText = book.desc;
+            const bSnap = await getDoc(doc(db, "books", id));
+            if(!bSnap.exists()) return;
+            const book = bSnap.data();
 
-            const myRatingSnap = await getDocs(query(collection(db, "Ratings"), where("bookId", "==", id), where("username", "==", currentUser.username)));
-            if(!myRatingSnap.empty) {
-                document.getElementById('my-book-rating').value = myRatingSnap.docs[0].data().score;
+            document.getElementById('modal-book-title').innerText = book.title;
+            document.getElementById('modal-book-desc').innerText = book.description || 'אין תיאור זמין לספר זה.';
+            
+            if(isUserAdmin()) {
+                document.getElementById('admin-rating-block-message').style.display = 'block';
+                document.getElementById('rating-form-controls').style.display = 'none';
             } else {
-                document.getElementById('my-book-rating').value = "0";
+                document.getElementById('admin-rating-block-message').style.display = 'none';
+                document.getElementById('rating-form-controls').style.display = 'block';
+                const currentRating = currentUser.ratings[id] || 0;
+                document.getElementById('my-book-rating').value = currentRating;
             }
 
-            const reviewsContainer = document.getElementById('modal-book-reviews');
-            reviewsContainer.innerHTML = "טוען דירוגים...";
-            const rSnap = await getDocs(query(collection(db, "Ratings"), where("bookId", "==", id)));
-            reviewsContainer.innerHTML = rSnap.empty ? "אין עדיין דירוגים לספר זה." : "";
-            rSnap.forEach(r => {
-                reviewsContainer.innerHTML += `<div style="padding:5px 0; border-bottom:1px solid var(--border)"><b>${r.data().username}:</b> נתן ציון ${r.data().score}/10</div>`;
+            // טעינת ביקורות קהילה
+            const reviewsBox = document.getElementById('modal-book-reviews');
+            reviewsBox.innerHTML = '';
+            
+            const uSnap = await getDocs(collection(db, "users"));
+            let hasReviews = false;
+            uSnap.forEach(uDoc => {
+                const uData = uDoc.data();
+                if(uData.ratings && uData.ratings[id]) {
+                    hasReviews = true;
+                    const div = document.createElement('div');
+                    div.style.padding = '5px 0';
+                    div.style.borderBottom = '1px dashed var(--border)';
+                    div.innerHTML = `<strong>${uData.username}:</strong> דירג ${uData.ratings[id]}/10`;
+                    reviewsBox.appendChild(div);
+                }
             });
+            if(!hasReviews) reviewsBox.innerText = "אתה מוזמן להיות הראשון שמדרג ספר זה!";
 
             openModal('book-detail-modal');
         }
 
         window.submitBookRating = async function() {
+            if(!selectedBookId || isUserAdmin()) return;
             const score = parseInt(document.getElementById('my-book-rating').value);
-            const rId = currentUser.username + "_" + selectedBookId;
+            const oldScore = currentUser.ratings[selectedBookId] || 0;
             
-            if(score === 0) {
-                await deleteDoc(doc(db, "Ratings", rId));
-            } else {
-                await setDoc(doc(db, "Ratings", rId), {
-                    username: currentUser.username,
-                    bookId: selectedBookId,
-                    score: score
-                });
+            if(score === oldScore) {
+                closeModal('book-detail-modal');
+                return;
             }
+
+            const bRef = doc(db, "books", selectedBookId);
+            const bSnap = await getDoc(bRef);
+            if(!bSnap.exists()) return;
+            const book = bSnap.data();
+
+            let newSum = (book.ratingsSum || 0);
+            let newCount = (book.ratingsCount || 0);
+
+            if(oldScore === 0 && score > 0) {
+                newCount += 1;
+                newSum += score;
+            } else if(oldScore > 0 && score === 0) {
+                newCount -= 1;
+                newSum -= oldScore;
+            } else if(oldScore > 0 && score > 0) {
+                newSum = newSum - oldScore + score;
+            }
+
+            await updateDoc(bRef, { ratingsSum: newSum, ratingsCount: newCount });
+            
+            currentUser.ratings[selectedBookId] = score;
+            await updateDoc(doc(db, "users", currentUser.username), { ratings: currentUser.ratings });
+
+            await writeAuditLog("RATE_BOOK", `המשתמש דירג את הספר '${book.title}' בציון ${score}`);
             closeModal('book-detail-modal');
             renderBooksView();
         }
@@ -865,398 +966,499 @@
         window.submitBookSuggestion = async function() {
             const title = document.getElementById('suggest-title').value.trim();
             const desc = document.getElementById('suggest-desc').value.trim();
-
-            if(!title || !desc) return alert("נא למלא שם ותיאור עבור הספר.");
-
-            const hourAgo = Date.now() - (60 * 60 * 1000);
-            const checkSpam = await getDocs(query(collection(db, "Suggestions"), where("suggestedBy", "==", currentUser.username)));
-            let isSpamming = false;
-            checkSpam.forEach(s => { if(s.data().epoch > hourAgo) isSpamming = true; });
-            if(isSpamming) return alert("הגבלת ספאם: מותר להציע ספר אחד בלבד בכל שעה.");
-
-            const existCheck = await getDocs(query(collection(db, "Books"), where("title", "==", title)));
-            if(!existCheck.empty) return alert("הספר כבר קיים במערכת הרשמית.");
-
-            const rejectCheck = await getDocs(query(collection(db, "Suggestions"), where("title", "==", title), where("status", "==", "Rejected")));
-            if(!rejectCheck.empty) return alert("ספר זה כבר הוצע בעבר ונדחה על ידי צוות הניהול.");
-
-            await addDoc(collection(db, "Suggestions"), {
-                title, desc, suggestedBy: currentUser.username, epoch: Date.now(), status: "Pending"
-            });
-
-            await writeAuditLog("ספרים", `הוצעה הצעה לספר חדש במערכת: ${title}`);
-            alert("הצעת הספר נשלחה בהצלחה וממתינה לאישור אדמין.");
-            closeModal('suggest-book-modal');
-            document.getElementById('suggest-title').value = "";
-            document.getElementById('suggest-desc').value = "";
-        }
-
-        async function renderChatsView() {
-            const threadsList = document.getElementById('chats-threads');
-            threadsList.innerHTML = "טוען שיחות...";
-            
-            let q;
-            if(currentUser.role === 'Admin+' || currentUser.role === 'SuperAdmin') {
-                q = query(collection(db, "Conversations"), orderBy("lastUpdate", "desc"));
-            } else {
-                q = query(collection(db, "Conversations"), where("participants", "array-contains", currentUser.username));
-            }
-
-            const cSnap = await getDocs(q);
-            threadsList.innerHTML = cSnap.empty ? "<div style='padding:15px;'>אין שיחות פעילות</div>" : "";
-            
-            cSnap.forEach(tDoc => {
-                const data = tDoc.data();
-                threadsList.innerHTML += `
-                    <div class="chat-item ${activeThreadId === tDoc.id ? 'active' : ''}" onclick="selectChatThread('${tDoc.id}')">
-                        <b>💬 ${data.participants.join(' ↔️ ')}</b>
-                        <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">סוג: ${data.type}</div>
-                    </div>
-                `;
-            });
-        }
-
-        window.selectChatThread = async function(id) {
-            activeThreadId = id;
-            document.getElementById('report-chat-btn').style.display = "block";
-            document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
-            
-            const msgBox = document.getElementById('chat-msg-box');
-            msgBox.innerHTML = "טוען הודעות...";
-
-            const mSnap = await getDocs(query(collection(db, "Messages"), where("threadId", "==", id), orderBy("epoch", "asc")));
-            msgBox.innerHTML = "";
-            mSnap.forEach(m => {
-                const msg = m.data();
-                let senderDisplay = msg.sender === currentUser.username ? "outgoing" : "incoming";
-                if(msg.sender === "System") senderDisplay = "system";
-
-                msgBox.innerHTML += `
-                    <div class="msg ${senderDisplay}">
-                        <div style="font-size:11px; font-weight:bold; margin-bottom:4px;">${msg.sender}</div>
-                        <div>${msg.text}</div>
-                    </div>
-                `;
-            });
-            msgBox.scrollTop = msgBox.scrollHeight;
-        }
-
-        window.sendChatMsg = async function() {
-            const txt = document.getElementById('chat-input-msg').value.trim();
-            if(!txt || !activeThreadId) return;
-
-            await addDoc(collection(db, "Messages"), {
-                threadId: activeThreadId,
-                sender: currentUser.username,
-                text: txt,
-                epoch: Date.now()
-            });
-
-            await updateDoc(doc(db, "Conversations", activeThreadId), { lastUpdate: Date.now() });
-            document.getElementById('chat-input-msg').value = "";
-            selectChatThread(activeThreadId);
-        }
-
-        window.openDirectChatWithUser = async function(targetUser) {
-            if(targetUser === currentUser.username) return alert("לא ניתן לפתוח שיחה עם עצמך.");
-            
-            const participants = [currentUser.username, targetUser].sort();
-            const chatId = participants[0] + "_" + participants[1];
-
-            await setDoc(doc(db, "Conversations", chatId), {
-                participants, type: "User-to-User", lastUpdate: Date.now()
-            });
-
-            switchView('chats');
-            selectChatThread(chatId);
-        }
-
-        window.reportCurrentChat = async function() {
-            if(!activeThreadId) return;
-            if(!confirm("האם ברצונך לפתוח תיק דיווח רשמי על תוכן שיחה זו לצוות האדמינים?")) return;
-
-            const adminsQuery = await getDocs(query(collection(db, "users"), where("role", "in", ["Admin", "Admin+", "SuperAdmin"])));
-            let selectedAdmin = "Book-U-Vers"; 
-            let minLoad = Infinity;
-
-            adminsQuery.forEach(a => {
-                const currentLoad = a.data().activeTicketsLoad || 0;
-                if(currentLoad < minLoad) {
-                    minLoad = currentLoad;
-                    selectedAdmin = a.id;
-                }
-            });
+            if(!title) return alert("שם הספר הוא שדה חובה.");
 
             await addDoc(collection(db, "Reports"), {
-                reportedItem: activeThreadId,
-                type: "Chat",
+                type: "BookSuggestion",
+                title: `הצעת ספר חדש: ${title}`,
+                description: desc,
                 reporter: currentUser.username,
-                assignedAdmin: selectedAdmin,
-                status: "Open",
-                epoch: Date.now()
+                createdAt: new Date().toLocaleString('he-IL'),
+                epoch: Date.now(),
+                status: "Open"
             });
 
-            await updateDoc(doc(db, "users", selectedAdmin), { activeTicketsLoad: (minLoad + 1) });
-            await writeAuditLog("דיווחים", `נפתח תיק דיווח חדש על שיחה ${activeThreadId} והוצמד לאדמין ${selectedAdmin}`);
-            alert(`הדיווח התקבל ומשויך אוטומטית לטיפול אדמין ${selectedAdmin}.`);
+            alert("הצעתך נשלחה לצוות המנהלים. תודה!");
+            closeModal('suggest-book-modal');
+            document.getElementById('suggest-title').value = '';
+            document.getElementById('suggest-desc').value = '';
         }
 
-        async function renderMatchesView() {
-            const grid = document.getElementById('matches-grid');
-            grid.innerHTML = "מחשב אחוזי התאמה מול כל קהילת הקוראים...";
+        // --- פאנל ניהול ספרים (סופר אדמין) ---
+        async function renderSuperBooksManagementView() {
+            if(!isSuperAdmin()) return;
+            const snap = await getDocs(collection(db, "books"));
+            const grid = document.getElementById('super-books-list-grid');
+            grid.innerHTML = '';
 
-            const usersSnap = await getDocs(collection(db, "users"));
-            const ratingsSnap = await getDocs(collection(db, "Ratings"));
-
-            let myRatings = {};
-            ratingsSnap.forEach(r => {
-                if(r.data().username === currentUser.username) myRatings[r.data().bookId] = r.data().score;
-            });
-
-            let matchesResults = [];
-
-            usersSnap.forEach(uDoc => {
-                const otherUser = uDoc.data().username;
-                if(otherUser === currentUser.username) return;
-
-                let otherRatings = {};
-                ratingsSnap.forEach(r => {
-                    if(r.data().username === otherUser) otherRatings[r.data().bookId] = r.data().score;
-                });
-
-                let sharedBooksCount = 0;
-                let absoluteDiffSum = 0;
-
-                for(let bId in myRatings) {
-                    if(otherRatings[bId]) {
-                        sharedBooksCount++;
-                        absoluteDiffSum += Math.abs(myRatings[bId] - otherRatings[bId]);
-                    }
-                }
-
-                if(sharedBooksCount > 0) {
-                    const avgDiff = absoluteDiffSum / sharedBooksCount;
-                    const matchPercent = (((9 - avgDiff) / 9) * 100).toFixed(0);
-                    matchesResults.push({ username: otherUser, pct: matchPercent, count: sharedBooksCount });
-                }
-            });
-
-            grid.innerHTML = matchesResults.length === 0 ? "עליך לדרג ספרים קודם כדי למצוא התאמות טעם עם קוראים אחרים." : "";
-            
-            matchesResults.sort((a,b) => b.pct - a.pct);
-            matchesResults.forEach(m => {
-                grid.innerHTML += `
-                    <div class="card" style="border-right: 5px solid var(--success);">
-                        <div class="card-title">👤 ${m.username}</div>
-                        <div style="font-size:24px; font-weight:900; color:var(--success); margin:10px 0;">${m.pct}% התאמה</div>
-                        <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">מבוסס על ${m.count} ספרים משותפים.</p>
-                        <button class="btn btn-primary" onclick="openDirectChatWithUser('${m.username}')">שלח הודעה</button>
-                    </div>
+            snap.forEach(d => {
+                const book = d.data();
+                const id = d.id;
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.borderColor = 'var(--danger)';
+                card.innerHTML = `
+                    <div class="card-title">${book.title}</div>
+                    <button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="superDeleteBook('${id}', '${book.title}')">🗑️ מחק לצמיתות</button>
                 `;
+                grid.appendChild(card);
             });
         }
 
+        window.superAddBookDirectly = async function() {
+            if(!isSuperAdmin()) return;
+            const title = document.getElementById('super-add-title').value.trim();
+            const desc = document.getElementById('super-add-desc').value.trim();
+            if(!title) return alert("הזן כותרת ספר.");
+
+            await addDoc(collection(db, "books"), {
+                title: title, description: desc, ratingsSum: 0, ratingsCount: 0
+            });
+
+            await writeAuditLog("SUPER_ADD_BOOK", `סופר אדמין הוסיף ספר ישירות למערכת: ${title}`);
+            document.getElementById('super-add-title').value = '';
+            document.getElementById('super-add-desc').value = '';
+            alert("הספר נוסף בהצלחה למערכת.");
+            renderSuperBooksManagementView();
+        }
+
+        window.superDeleteBook = async function(id, title) {
+            if(!isSuperAdmin()) return;
+            if(!confirm(`האם למחוק את הספר '${title}' מכלל המאגר העולמי?`)) return;
+            await deleteDoc(doc(db, "books", id));
+            await writeAuditLog("SUPER_DELETE_BOOK", `סופר אדמין מחק את הספר: ${title}`);
+            renderSuperBooksManagementView();
+        }
+
+        // --- קהילת קוראים + סינון מתקדם ---
         async function renderUsersView() {
+            const userSearch = document.getElementById('user-search').value.trim().toLowerCase();
+            const bookSearch = document.getElementById('book-title-search').value.trim().toLowerCase();
+            const minRating = parseInt(document.getElementById('rating-search-min').value) || 0;
+
+            const uSnap = await getDocs(collection(db, "users"));
+            const bSnap = await getDocs(collection(db, "books"));
+            
+            // יצירת מפה של מזהה ספר לכותרת ספר לצורך חיפוש יעיל
+            const bookMap = {};
+            bSnap.forEach(d => { bookMap[d.id] = d.data().title.toLowerCase(); });
+
             const grid = document.getElementById('users-grid');
-            grid.innerHTML = "טוען חברי קהילה...";
+            grid.innerHTML = '';
 
-            const txtSearch = document.getElementById('user-search').value.toLowerCase();
-            const minRatingSearch = parseInt(document.getElementById('rating-search-min').value) || 0;
+            uSnap.forEach(docBox => {
+                const user = docBox.data();
+                if(user.role !== 'User' || user.username === currentUser.username) return;
 
-            const usersSnap = await getDocs(collection(db, "users"));
-            const ratingsSnap = await getDocs(collection(db, "Ratings"));
+                // מסנן 1: שם משתמש
+                if(userSearch && !user.username.toLowerCase().includes(userSearch)) return;
 
-            grid.innerHTML = "";
-            usersSnap.forEach(uDoc => {
-                const u = uDoc.data();
-                if(u.username === currentUser.username) return;
+                // מסנן 2 + 3: ספר ספציפי ודירוג מינימלי
+                if(bookSearch || minRating > 0) {
+                    let matchCondition = false;
+                    for(const bId in user.ratings) {
+                        const score = user.ratings[bId];
+                        const bTitle = bookMap[bId] || '';
+                        
+                        let titleMatch = bookSearch ? bTitle.includes(bookSearch) : true;
+                        let ratingMatch = minRating > 0 ? (score >= minRating) : true;
 
-                if(txtSearch && !u.username.toLowerCase().includes(txtSearch)) return;
-
-                let passedRatingFilter = minRatingSearch === 0;
-                let userScores = [];
-                ratingsSnap.forEach(r => {
-                    if(r.data().username === u.username) {
-                        userScores.push(r.data().score);
-                        if(r.data().score >= minRatingSearch) passedRatingFilter = true;
+                        if(titleMatch && ratingMatch) {
+                            matchCondition = true;
+                            break;
+                        }
                     }
-                });
+                    if(!matchCondition) return;
+                }
 
-                if(!passedRatingFilter) return;
-
-                const avgScore = userScores.length ? (userScores.reduce((a,b)=>a+b,0)/userScores.length).toFixed(1) : "ללא";
-
-                grid.innerHTML += `
-                    <div class="card">
-                        <div class="card-title">👤 ${u.username}</div>
-                        <div style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">דרגה: ${u.role} | נראה לאחרונה: ${u.lastSeen}</div>
-                        <div style="font-size:13px; font-weight:bold; margin-bottom:15px;">⭐ ממוצע דירוגים: ${avgScore} (קרא ${userScores.length} ספרים)</div>
-                        <div style="display:flex; gap:5px;">
-                            <button class="btn btn-primary" style="padding:6px 12px; font-size:12px;" onclick="openDirectChatWithUser('${u.username}')">💬 שיחה</button>
-                            <button class="btn btn-danger" style="padding:6px 12px; font-size:12px;" onclick="reportUserAction('${u.username}')">🚨 דווח</button>
-                        </div>
+                // רינדור כרטיס המשתמש
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-title">👤 ${user.username}</div>
+                    <p style="font-size:14px; color:var(--text-muted); margin-bottom:15px;">הצטרף/ה ב: ${user.joinedAt || 'לא ידוע'}</p>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-primary" style="flex:1; font-size:13px;" onclick="initiateChatWith('${user.username}')">💬 שלח הודעה</button>
+                        <button class="btn btn-danger" style="font-size:13px;" onclick="reportUserModal('${user.username}')">🚨 דווח</button>
                     </div>
                 `;
+                grid.appendChild(card);
             });
         }
 
         window.luckyRandomUser = async function() {
-            const uSnap = await getDocs(collection(db, "users"));
-            let list = [];
-            uSnap.forEach(doc => { if(doc.id !== currentUser.username) list.push(doc.id); });
-            if(list.length === 0) return alert("אין משתמשים נוספים במערכת כרגע.");
-            const luckyName = list[Math.floor(Math.random() * list.length)];
-            document.getElementById('user-search').value = luckyName;
-            renderUsersView();
-        }
-
-        window.reportUserAction = async function(target) {
-            if(!confirm(`האם ברצונך לפתוח תיק דיווח רשמי נגד המשתמש ${target}?`)) return;
-            await addDoc(collection(db, "Reports"), {
-                reportedItem: target, type: "User", reporter: currentUser.username, assignedAdmin: "Book-U-Vers", status: "Open", epoch: Date.now()
+            const snap = await getDocs(collection(db, "users"));
+            const usersList = [];
+            snap.forEach(d => {
+                const u = d.data();
+                if(u.role === 'User' && u.username !== currentUser.username) {
+                    usersList.push(u.username);
+                }
             });
-            alert("הדיווח נרשם וייבדק על ידי צוות הניהול.");
+            if(usersList.length === 0) return alert("אין קוראים נוספים במערכת כרגע.");
+            const lucky = usersList[Math.floor(Math.random() * usersList.length)];
+            alert(`הקורא האקראי שעלה בגורל: ${lucky}! פותח תיבת שיחה...`);
+            initiateChatWith(lucky);
         }
 
-        async function renderStatsView() {
-            const grid = document.getElementById('stats-grid');
-            const u = await getDocs(collection(db, "users"));
-            const b = await getDocs(collection(db, "Books"));
-            const r = await getDocs(collection(db, "Ratings"));
-            const t = await getDocs(collection(db, "Conversations"));
+        window.reportUserModal = async function(reportedUsername) {
+            const reason = prompt(`הזן את סיבת הדיווח על המשתמש ${reportedUsername}:`);
+            if(!reason) return;
 
+            await addDoc(collection(db, "Reports"), {
+                type: "UserReport",
+                title: `דיווח על המשתמש: ${reportedUsername}`,
+                description: reason,
+                reportedTarget: reportedUsername,
+                reporter: currentUser.username,
+                createdAt: new Date().toLocaleString('he-IL'),
+                epoch: Date.now(),
+                status: "Open"
+            });
+            alert("הדיווח נקלט במערכת הבקרה ויטופל בהקדם.");
+            await writeAuditLog("REPORT_USER", `דיווח הוגש נגד ${reportedUsername}`);
+        }
+
+        // --- אלגוריתם התאמות קריאה מתקדם (מבוסס קוסינוס/חפיפת וקטורים) ---
+        async function renderMatchesView() {
+            if(isUserAdmin()) return;
+            const uSnap = await getDocs(collection(db, "users"));
+            const matchesGrid = document.getElementById('matches-grid');
+            matchesGrid.innerHTML = '';
+
+            const myRatings = currentUser.ratings || {};
+            const myBookIds = Object.keys(myRatings).filter(id => myRatings[id] > 0);
+
+            if(myBookIds.length === 0) {
+                matchesGrid.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center;"><h2>עלייך לדרג לפחות ספר אחד במערכת על מנת שנוכל למצוא לך התאמות קריאה.</h2></div>`;
+                return;
+            }
+
+            const matchResults = [];
+
+            uSnap.forEach(docBox => {
+                const peer = docBox.data();
+                if(peer.role !== 'User' || peer.username === currentUser.username) return;
+
+                const peerRatings = peer.ratings || {};
+                let sharedBooksCount = 0;
+                let squaredDiffSum = 0;
+
+                myBookIds.forEach(bId => {
+                    if(peerRatings[bId] && peerRatings[bId] > 0) {
+                        sharedBooksCount++;
+                        squaredDiffSum += Math.pow(myRatings[bId] - peerRatings[bId], 2);
+                    }
+                });
+
+                if(sharedBooksCount > 0) {
+                    // חישוב מדד מרחק דמוי אוקלידי משוקלל לאחוז התאמה
+                    const distance = Math.sqrt(squaredDiffSum) / sharedBooksCount;
+                    let matchPercentage = Math.max(10, Math.round(100 - (distance * 10)));
+                    
+                    // בונוס קל על ריבוי ספרים משותפים
+                    matchPercentage += Math.min(15, sharedBooksCount * 2);
+                    if(matchPercentage > 100) matchPercentage = 100;
+
+                    matchResults.push({
+                        username: peer.username,
+                        score: matchPercentage,
+                        sharedCount: sharedBooksCount
+                    });
+                }
+            });
+
+            matchResults.sort((a, b) => b.score - a.score);
+
+            if(matchResults.length === 0) {
+                matchesGrid.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center;"><h2>לא נמצאו קוראים בעלי טעם דומה כרגע. נסה לדרג ספרים נוספים במאגר!</h2></div>`;
+                return;
+            }
+
+            matchResults.forEach(res => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.border = '2px solid var(--success)';
+                card.innerHTML = `
+                    <div style="font-size:40px; text-align:center;">🔥 ${res.score}%</div>
+                    <div class="card-title" style="text-align:center; margin:10px 0;">${res.username}</div>
+                    <p style="text-align:center; font-size:14px; color:var(--text-muted); margin-bottom:15px;">טעם קריאה משותף ב-${res.sharedCount} ספרים</p>
+                    <button class="btn btn-success" style="width:100%;" onclick="initiateChatWith('${res.username}')">💬 תתחילו לדבר</button>
+                `;
+                matchesGrid.appendChild(card);
+            });
+        }
+
+        // --- מערכת צ'אט והודעות פרטיות בזמן אמת ---
+        window.initiateChatWith = function(peerUsername) {
+            activeChatRecipient = peerUsername;
+            switchView('chats');
+        }
+
+        async function renderChatsView() {
+            // טעינת רשימת השרשורים/אנשים שאיתם שוחחנו
+            const uSnap = await getDocs(collection(db, "users"));
+            const threadsBox = document.getElementById('chats-threads');
+            threadsBox.innerHTML = '';
+
+            let hasThreads = false;
+            uSnap.forEach(d => {
+                const u = d.data();
+                if(u.role === 'User' && u.username !== currentUser.username) {
+                    hasThreads = true;
+                    const item = document.createElement('div');
+                    item.className = `chat-item ${activeChatRecipient === u.username ? 'active' : ''}`;
+                    item.innerText = `👤 ${u.username}`;
+                    item.onclick = () => {
+                        activeChatRecipient = u.username;
+                        renderChatsView();
+                    };
+                    threadsBox.appendChild(item);
+                }
+            });
+
+            if(!hasThreads) {
+                threadsBox.innerText = "אין משתמשים זמינים";
+            }
+
+            if(chatUnsubscribe) chatUnsubscribe();
+
+            const msgBox = document.getElementById('chat-msg-box');
+            if(!activeChatRecipient) {
+                msgBox.innerHTML = "אנא בחר שיחה פעילה מהרשימה הימנית.";
+                return;
+            }
+
+            // יצירת מזהה חדר צ'אט דטרמיניסטי מבוסס סדר אלפבית של שמות המשתמשים
+            const chatRoomId = [currentUser.username, activeChatRecipient].sort().join("___vs___");
+            
+            const q = query(collection(db, "Chats"), where("roomId", "==", chatRoomId), orderBy("epoch", "asc"));
+            
+            chatUnsubscribe = onSnapshot(q, (snapshot) => {
+                msgBox.innerHTML = '';
+                if(snapshot.empty) {
+                    msgBox.innerHTML = `<div style="text-align:center; color:var(--text-muted); margin-top:20px;">אין הודעות קודמות בשיחה זו. אמרו שלום!</div>`;
+                }
+                snapshot.forEach(docBox => {
+                    const data = docBox.data();
+                    const div = document.createElement('div');
+                    const isMe = data.sender === currentUser.username;
+                    div.className = `msg ${isMe ? 'outgoing' : 'incoming'}`;
+                    div.innerText = data.text;
+                    msgBox.appendChild(div);
+                });
+                msgBox.scrollTop = msgBox.scrollHeight;
+            });
+        }
+
+        window.sendChatMsg = async function() {
+            const input = document.getElementById('chat-input-msg');
+            const text = input.value.trim();
+            if(!text || !activeChatRecipient) return;
+
+            const chatRoomId = [currentUser.username, activeChatRecipient].sort().join("___vs___");
+            await addDoc(collection(db, "Chats"), {
+                roomId: chatRoomId,
+                sender: currentUser.username,
+                recipient: activeChatRecipient,
+                text: text,
+                epoch: Date.now()
+            });
+
+            input.value = '';
+        }
+
+        // --- סטטיסטיקות מערכת (אדמינים) ---
+        async function renderStatsView() {
+            if(!isUserAdmin()) return;
+            const u = await getDocs(collection(db, "users"));
+            const b = await getDocs(collection(db, "books"));
+            const l = await getDocs(collection(db, "ActivityLogs"));
+            const r = await getDocs(collection(db, "Reports"));
+
+            const grid = document.getElementById('stats-grid');
             grid.innerHTML = `
-                <div class="card" style="border-right: 4px solid var(--accent)"><h2>${u.size}</h2><p>משתמשים רשומים</p></div>
-                <div class="card" style="border-right: 4px solid var(--success)"><h2>${b.size}</h2><p>ספרים רשמיים במאגר</p></div>
-                <div class="card" style="border-right: 4px solid var(--warning)"><h2>${r.size}</h2><p>דירוגי קריאה מבוצעים</p></div>
-                <div class="card" style="border-right: 4px solid var(--danger)"><h2>${t.size}</h2><p>שיחות פעילות בענן</p></div>
+                <div class="card"><h3>סה"ך קוראים רשומים</h3><h1 style="color:var(--accent); font-size:48px;">${u.size}</h1></div>
+                <div class="card"><h3>ספרים במאגר העולמי</h3><h1 style="color:var(--success); font-size:48px;">${b.size}</h1></div>
+                <div class="card"><h3>פעולות מתועדות ביומן</h3><h1 style="color:var(--warning); font-size:48px;">${l.size}</h1></div>
+                <div class="card"><h3>דיווחים והצעות ספרים</h3><h1 style="color:var(--danger); font-size:48px;">${r.size}</h1></div>
             `;
         }
 
+        // --- ניהול דיווחים והצעות ספרים (אדמינים) ---
         async function renderReportsView() {
-            const box = document.getElementById('reports-container');
-            box.innerHTML = "טוען תיקי דיווח פתוחים...";
-            
-            const repSnap = await getDocs(collection(db, "Reports"));
-            box.innerHTML = repSnap.empty ? "אין כרגע תיקי דיווח הממתינים לטיפול." : "";
+            if(!isUserAdmin()) return;
+            const snap = await getDocs(query(collection(db, "Reports"), where("status", "==", "Open"), orderBy("epoch", "desc")));
+            const container = document.getElementById('reports-container');
+            container.innerHTML = '';
 
-            repSnap.forEach(rDoc => {
-                const r = rDoc.data();
-                if(r.status === "Closed") return;
+            if(snap.empty) {
+                container.innerHTML = `<div class="card" style="grid-column:1/-1;"><h3>אין פניות או דיווחים פתוחים לטיפול כעת.</h3></div>`;
+                return;
+            }
 
-                box.innerHTML += `
-                    <div class="card" style="margin-bottom:15px; border-right:4px solid var(--danger);">
-                        <h4>תיק דיווח על סוג: ${r.type} | מדווח: ${r.reportedItem}</h4>
-                        <p style="font-size:13px; color:var(--text-muted);">הוגש ע"י: ${r.reporter} | אדמין מטפל: ${r.assignedAdmin}</p>
-                        <div style="display:flex; gap:10px; margin-top:15px;">
-                            <button class="btn btn-success" style="padding:6px 12px; font-size:13px;" onclick="closeTicket('${rDoc.id}', '${r.assignedAdmin}')">סגור תיק כטופל</button>
-                            <button class="btn btn-danger" style="padding:6px 12px; font-size:13px;" onclick="suspendUserViaTicket('${r.reportedItem}', '${rDoc.id}', '${r.assignedAdmin}')">השעה משתמש מהמערכת</button>
-                        </div>
-                    </div>
+            snap.forEach(d => {
+                const rep = d.data();
+                const id = d.id;
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.borderColor = 'var(--warning)';
+                
+                let actionButtons = '';
+                if(rep.type === 'UserReport') {
+                    actionButtons = `
+                        <button class="btn btn-danger" style="font-size:12px; margin-top:10px;" onclick="adminSuspendUser('${id}', '${rep.reportedTarget}')">❌ השעה משתמש</button>
+                        <button class="btn btn-secondary" style="font-size:12px; margin-top:10px;" onclick="adminCloseReport('${id}')">✅ סגור פנייה</button>
+                    `;
+                } else if(rep.type === 'BookSuggestion') {
+                    actionButtons = `
+                        <button class="btn btn-success" style="font-size:12px; margin-top:10px;" onclick="adminApproveBookSuggestion('${id}', '${rep.title.replace("הצעת ספר חדש: ", "")}', '${rep.description}')">➕ אשר והוסף למאגר</button>
+                        <button class="btn btn-secondary" style="font-size:12px; margin-top:10px;" onclick="adminCloseReport('${id}')">דחה הצעה</button>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div style="font-weight:bold; color:var(--accent); margin-bottom:5px;">סוג: ${rep.type}</div>
+                    <div class="card-title" style="font-size:18px;">${rep.title}</div>
+                    <p style="font-size:14px; margin-bottom:10px;">${rep.description || 'אין פירוט'}</p>
+                    <div style="font-size:12px; color:var(--text-muted);">מדווח: ${rep.reporter} | ${rep.createdAt}</div>
+                    <div style="display:flex; gap:5px; flex-wrap:wrap;">${actionButtons}</div>
                 `;
+                container.appendChild(card);
             });
         }
 
-        window.closeTicket = async function(id, admin) {
+        window.adminCloseReport = async function(id) {
+            if(!isUserAdmin()) return;
             await updateDoc(doc(db, "Reports", id), { status: "Closed" });
-            const aDoc = await getDoc(doc(db, "users", admin));
-            if(aDoc.exists()) {
-                let currentLoad = aDoc.data().activeTicketsLoad || 1;
-                await updateDoc(doc(db, "users", admin), { activeTicketsLoad: Math.max(0, currentLoad - 1) });
-            }
-            await writeAuditLog("דיווחים", `נסגר תיק דיווח שמספרו: ${id}`);
+            await writeAuditLog("CLOSE_REPORT", `מנהל סגר פנייה שמספרה: ${id}`);
             renderReportsView();
         }
 
-        window.suspendUserViaTicket = async function(targetUser, ticketId, admin) {
-            await updateDoc(doc(db, "users", targetUser), { isSuspended: true });
-            await writeAuditLog("השעיות", `המשתמש ${targetUser} הושעה מהמערכת.`);
-            alert(`המשתמש ${targetUser} הושעה.`);
-            closeTicket(ticketId, admin);
-        }
-
-        async function renderAdminsView() {
-            const tbody = document.getElementById('admins-table-body');
-            tbody.innerHTML = "טוען רשימות מנהלים...";
-
-            const usersSnap = await getDocs(collection(db, "users"));
-            tbody.innerHTML = "";
-
-            usersSnap.forEach(uDoc => {
-                const u = uDoc.data();
-                if(u.role === 'User') return;
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td><b>${u.username}</b></td>
-                        <td>${u.role}</td>
-                        <td>${u.activeTicketsLoad || 0} תיקים פתוחים</td>
-                        <td>
-                            <button class="btn btn-warning" style="padding:4px 8px; font-size:12px;" onclick="changeAdminRole('${u.username}', 'Admin')">הורד ל-Admin</button>
-                            <button class="btn btn-primary" style="padding:4px 8px; font-size:12px;" onclick="changeAdminRole('${u.username}', 'Admin+')">העלה ל-Admin+</button>
-                            <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="stripAdminRole('${u.username}')">בטל מינוי</button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        window.appointNewAdmin = async function() {
-            const name = document.getElementById('new-admin-username').value.trim();
-            const role = document.getElementById('new-admin-role').value;
-            
-            if(!name) return;
-            const uRef = doc(db, "users", name);
+        window.adminSuspendUser = async function(reportId, usernameToSuspend) {
+            if(!isUserAdmin()) return;
+            const uRef = doc(db, "users", usernameToSuspend);
             const uSnap = await getDoc(uRef);
-            if(!uSnap.exists()) return alert("המשתמש אינו קיים במערכת.");
-
-            await updateDoc(uRef, { role: role, activeTicketsLoad: 0 });
-            await writeAuditLog("ניהול אדמינים", `מונה אדמין חדש במערכת: ${name} בדרגת ${role}`);
-            document.getElementById('new-admin-username').value = "";
-            renderAdminsView();
-        }
-
-        window.changeAdminRole = async function(target, targetRole) {
-            if(target.toLowerCase() === "book-u-vers") return alert("אבטחת מערכת: לא ניתן לשנות את הדרגה של ה-SuperAdmin הראשי.");
+            if(!uSnap.exists()) return alert("המשתמש לא נמצא.");
             
-            if(currentUser.role !== 'SuperAdmin' && targetRole === 'Admin+') {
-                return alert("אבטחת מערכת: רק ה-SuperAdmin הראשי רשאי למנות מנהלים לדרגת Admin+.");
+            if(['Admin','Admin+','SuperAdmin'].includes(uSnap.data().role)) {
+                return alert("אין לך הרשאה להשעות אנשי צוות ניהול.");
             }
 
-            await updateDoc(doc(db, "users", target), { role: targetRole });
-            await writeAuditLog("ניהול אדמינים", `שונתה דרגת המנהל של ${target} ל- ${targetRole}`);
-            renderAdminsView();
+            await updateDoc(uRef, { isSuspended: true });
+            await updateDoc(doc(db, "Reports", reportId), { status: "Closed" });
+            await writeAuditLog("SUSPEND_USER", `המנהל השעה את המשתמש: ${usernameToSuspend}`);
+            alert(`המשתמש ${usernameToSuspend} הושעה מהמערכת.`);
+            renderReportsView();
         }
 
-        window.stripAdminRole = async function(target) {
-            if(target.toLowerCase() === "book-u-vers") return alert("אבטחת מערכת: לא ניתן לבטל את הרשאות ה-SuperAdmin.");
-            await updateDoc(doc(db, "users", target), { role: "User" });
-            await writeAuditLog("ניהול אדמינים", `בוטלו הרשאות הניהול עבור: ${target}`);
-            renderAdminsView();
+        window.adminApproveBookSuggestion = async function(reportId, title, description) {
+            if(!isUserAdmin()) return;
+            await addDoc(collection(db, "books"), {
+                title: title, description: description, ratingsSum: 0, ratingsCount: 0
+            });
+            await updateDoc(doc(db, "Reports", reportId), { status: "Closed" });
+            await writeAuditLog("APPROVE_BOOK_SUGGESTION", `מנהל אישר והוסיף ספר חדש: ${title}`);
+            alert("הספר התווסף למאגר בהצלחה.");
+            renderReportsView();
         }
 
-        async function renderAuditLogsView() {
-            const container = document.getElementById('system-audit-logs');
-            container.innerHTML = "טוען יומן אבטחה...";
-
-            const logsSnap = await getDocs(query(collection(db, "ActivityLogs"), orderBy("epoch", "desc")));
-            container.innerHTML = "";
+        // --- פאנל ניהול צוות אדמינים (Admin+ / SuperAdmin) ---
+        async function renderAdminsView() {
+            if(currentUser.role !== 'Admin+' && currentUser.role !== 'SuperAdmin') return;
+            const snap = await getDocs(collection(db, "users"));
+            const reportsSnap = await getDocs(query(collection(db, "Reports"), where("status", "==", "Open")));
             
-            logsSnap.forEach(l => {
-                const log = l.data();
-                container.innerHTML += `
-                    <li class="log-item">
-                        <b>[${log.timestamp}]</b> 
-                        <span style="color:var(--accent)">[קטגוריה: ${log.actionType}]</span> 
-                        מפעיל: <mark style="padding:2px 4px; border-radius:4px;">${log.operator}</mark> ↔️ ${log.description}
-                    </li>
+            // חישוב עומס משימות פתוחות על פי מנהל מדווח/מטפל (כאן מחושב כללי לצרכי הדגמה)
+            const openReportsCount = reportsSnap.size;
+
+            const tbody = document.getElementById('admins-table-body');
+            tbody.innerHTML = '';
+
+            snap.forEach(docBox => {
+                const user = docBox.data();
+                if(!['Admin', 'Admin+'].includes(user.role)) return;
+
+                const tr = document.createElement('tr');
+                
+                let actionButtons = '';
+                if(isSuperAdmin()) {
+                    actionButtons = `
+                        <button class="btn btn-primary" style="padding:5px 10px; font-size:12px;" onclick="changeAdminRole('${user.username}', '${user.role === 'Admin' ? 'Admin+' : 'Admin'}')">שנה דרגה</button>
+                        <button class="btn btn-danger" style="padding:5px 10px; font-size:12px; margin-right:5px;" onclick="deleteAdminDirectly('${user.username}')">מחק</button>
+                    `;
+                } else {
+                    actionButtons = `<span style="color:var(--text-muted); font-size:13px;">אין הרשאות סופר</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td><strong>${user.username}</strong></td>
+                    <td><span style="color:var(--warning); font-weight:bold;">${user.role}</span></td>
+                    <td>${openReportsCount} תיקים פתוחים במערכת</td>
+                    <td>${actionButtons}</td>
                 `;
+                tbody.appendChild(tr);
             });
         }
 
-        window.openModal = function(id) { document.getElementById(id).style.display = 'flex'; }
-        window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; }
+        window.createNewAdminAccount = async function() {
+            if(currentUser.role !== 'Admin+' && currentUser.role !== 'SuperAdmin') return;
+            const user = document.getElementById('new-admin-username').value.trim();
+            const pass = document.getElementById('new-admin-password').value;
+            const role = document.getElementById('new-admin-role').value;
 
+            if(!user || !pass) return alert("מלא את כל שדות היצירה.");
+            
+            const check = await getDoc(doc(db, "users", user));
+            if(check.exists()) return alert("שם משתמש זה כבר תפוס.");
+
+            const hash = await cryptoHash(pass, user);
+            await setDoc(doc(db, "users", user), {
+                username: user, passwordHash: hash, role: role,
+                joinedAt: new Date().toLocaleDateString('he-IL'), isSuspended: false
+            });
+
+            await writeAuditLog("CREATE_ADMIN", `נוצר חשבון ניהול חדש: ${user} בדרגת ${role}`);
+            alert(`חשבון המנהל ${user} הוקם בהצלחה.`);
+            document.getElementById('new-admin-username').value = '';
+            document.getElementById('new-admin-password').value = '';
+            renderAdminsView();
+        }
+
+        window.changeAdminRole = async function(targetUser, newRole) {
+            if(!isSuperAdmin()) return;
+            await updateDoc(doc(db, "users", targetUser), { role: newRole });
+            await writeAuditLog("CHANGE_ADMIN_ROLE", `דרגת המנהל ${targetUser} שונתה ל-${newRole}`);
+            renderAdminsView();
+        }
+
+        window.deleteAdminDirectly = async function(targetUser) {
+            if(!isSuperAdmin()) return;
+            if(!confirm(`האם למחוק לחלוטין את חשבון המנהל ${targetUser}?`)) return;
+            await deleteDoc(doc(db, "users", targetUser));
+            await writeAuditLog("DELETE_ADMIN", `סופר אדמין מחק את חשבון המנהל: ${targetUser}`);
+            renderAdminsView();
+        }
+
+        // --- יומן מערכת מאובטח (Audit Log) ---
+        async function renderSystemAuditLogsView() {
+            if(currentUser.role !== 'Admin+' && currentUser.role !== 'SuperAdmin') return;
+            const q = query(collection(db, "ActivityLogs"), orderBy("epoch", "desc"));
+            const snap = await getDocs(q);
+            const container = document.getElementById('system-audit-logs');
+            container.innerHTML = '';
+
+            snap.forEach(d => {
+                const log = d.data();
+                const li = document.createElement('li');
+                li.className = 'log-item';
+                li.style.borderLeft = '4px solid var(--accent)';
+                li.innerHTML = `<strong>[${log.timestamp}] [${log.actionType}]</strong> על ידי <span>${log.operator}</span>: ${log.description}`;
+                container.appendChild(li);
+            });
+        }
+
+        // אתחול האפליקציה והגדרת מצב תצוגה ראשוני
         initAppTheme();
     </script>
 </body>
