@@ -527,7 +527,6 @@
             updateDoc, deleteDoc, query, where, orderBy, addDoc, onSnapshot
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // הפרטים האמיתיים של הפרויקט שלך עודכנו כאן באופן סופי ומלא
         const firebaseConfig = {
             apiKey: "BG1LY9E0WM2qd1Dlya1BPt9DChfS-ZWwhvvyCygb8bmzQQcxOWhUAWrDJqiUByfL4nBdZ12KZgncLyxtzf-wJTA",
             authDomain: "bookuvers-fe1ec.firebaseapp.com",
@@ -780,4 +779,325 @@
         window.superAddBookDirectly = async function() {
             if(!['Admin+', 'SuperAdmin'].includes(currentUser.role)) return;
             const title = document.getElementById('super-add-title').value.trim();
-            const desc = document.getElementById('super-add-desc').value
+            const desc = document.getElementById('super-add-desc').value.trim();
+            if(!title) return;
+            await addDoc(collection(db, "books"), { title: title, description: desc });
+            document.getElementById('super-add-title').value = '';
+            document.getElementById('super-add-desc').value = '';
+            renderSuperBooksManagementView();
+        }
+
+        window.superDeleteBook = async function(id) {
+            if(!['Admin+', 'SuperAdmin'].includes(currentUser.role)) return;
+            if(!confirm("למחוק ספר זה מהמאגר?")) return;
+            await deleteDoc(doc(db, "books", id));
+            renderSuperBooksManagementView();
+        }
+
+        // --- קהילת משתמשים ---
+        async function renderUsersView() {
+            const search = document.getElementById('user-search').value.trim().toLowerCase();
+            const snap = await getDocs(collection(db, "users"));
+            const grid = document.getElementById('users-grid');
+            grid.innerHTML = '';
+
+            snap.forEach(d => {
+                const user = d.data();
+                if(user.username === currentUser.username) return;
+                if(search && !user.username.toLowerCase().includes(search)) return;
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                let actionButtons = '';
+                if(currentUser.role === 'User') {
+                    actionButtons = `
+                        <button class="btn btn-primary" onclick="initiateChatWith('${user.username}')">💬 צ'אט</button>
+                        <button class="btn btn-danger" onclick="reportUser('${user.username}')">🚨 דווח</button>
+                    `;
+                } else {
+                    const suspensionText = user.isSuspended ? "🔓 בטל השעיה" : "🚫 השעה משתמש";
+                    actionButtons = `
+                        <button class="btn btn-primary" onclick="initiateChatWith('${user.username}')">💬 שיחה</button>
+                        <button class="btn btn-warning" onclick="toggleSuspendUser('${user.username}', ${user.isSuspended})">${suspensionText}</button>
+                        <button class="btn btn-danger" onclick="adminDeleteUserAccount('${user.username}')">🗑️ מחק חשבון</button>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="card-title">👤 ${user.username}</div>
+                    <p style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">דרגה: ${user.role} ${user.isSuspended ? ' <b style="color:var(--danger);">(מושעה)</b>' : ''}</p>
+                    <div style="display:flex; flex-direction:column; gap:8px;">${actionButtons}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        window.toggleSuspendUser = async function(username, currentStatus) {
+            if(currentUser.role === 'User') return;
+            const nextStatus = !currentStatus;
+            await updateDoc(doc(db, "users", username), { isSuspended: nextStatus });
+            await writeAuditLog("MANAGEMENT", `הסטטוס של ${username} שונה ל: ${nextStatus ? 'מושעה' : 'פעיל'}`);
+            alert(`החשבון של ${username} עודכן.`);
+            renderUsersView();
+        }
+
+        window.adminDeleteUserAccount = async function(username) {
+            if(currentUser.role === 'User') return;
+            if(!confirm(`האם אתה בטוח שברצונך למחוק לחלוטין את החשבון של ${username}?`)) return;
+            await deleteDoc(doc(db, "users", username));
+            await writeAuditLog("MANAGEMENT", `החשבון של המשתמש ${username} נמחק על ידי אדמין`);
+            alert(`החשבון של ${username} נמחק מהמערכת.`);
+            renderUsersView();
+        }
+
+        window.reportUser = async function(username) {
+            if(currentUser.role !== 'User') return;
+            const reason = prompt("הזן סיבת דיווח:");
+            if(!reason) return;
+            await addDoc(collection(db, "Reports"), {
+                type: "UserReport", title: `דיווח על: ${username}`, description: reason,
+                reportedTarget: username, reporter: currentUser.username, epoch: Date.now(), status: "Open"
+            });
+            alert("הדיווח הוגש.");
+        }
+
+        window.luckyRandomUser = async function() {
+            if(currentUser.role !== 'User') return;
+            const snap = await getDocs(collection(db, "users"));
+            const list = [];
+            snap.forEach(d => { if(d.data().role === 'User' && d.data().username !== currentUser.username) list.push(d.data().username); });
+            if(list.length === 0) return;
+            initiateChatWith(list[Math.floor(Math.random() * list.length)]);
+        }
+
+        // --- התאמות קריאה ---
+        async function renderMatchesView() {
+            if(currentUser.role !== 'User') return;
+            const uSnap = await getDocs(collection(db, "users"));
+            const grid = document.getElementById('matches-grid');
+            grid.innerHTML = '';
+            
+            uSnap.forEach(d => {
+                const peer = d.data();
+                if(peer.role !== 'User' || peer.username === currentUser.username) return;
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-title">👤 ${peer.username}</div>
+                    <button class="btn btn-success" onclick="initiateChatWith('${peer.username}')">💬 התחל שיחה</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- מערכת צ'אט ---
+        window.initiateChatWith = function(peerUsername) {
+            activeChatRecipient = peerUsername;
+            switchView('chats');
+        }
+
+        async function renderChatsView() {
+            const uSnap = await getDocs(collection(db, "users"));
+            const threadsBox = document.getElementById('chats-threads');
+            threadsBox.innerHTML = '';
+
+            uSnap.forEach(d => {
+                const u = d.data();
+                if(u.username === currentUser.username) return;
+
+                if(currentUser.role === 'User' && u.role !== 'User') return;
+
+                const item = document.createElement('div');
+                item.className = `chat-item ${activeChatRecipient === u.username ? 'active' : ''}`;
+                item.innerText = `👤 ${u.username} (${u.role})`;
+                item.onclick = () => { activeChatRecipient = u.username; renderChatsView(); };
+                threadsBox.appendChild(item);
+            });
+
+            if(chatUnsubscribe) chatUnsubscribe();
+            const msgBox = document.getElementById('chat-msg-box');
+            if(!activeChatRecipient) { msgBox.innerHTML = "בחר שיחה מהרשימה."; return; }
+
+            const chatRoomId = [currentUser.username, activeChatRecipient].sort().join("___vs___");
+            const q = query(collection(db, "Chats"), where("roomId", "==", chatRoomId), orderBy("epoch", "asc"));
+            
+            chatUnsubscribe = onSnapshot(q, (snapshot) => {
+                msgBox.innerHTML = '';
+                snapshot.forEach(docBox => {
+                    const data = docBox.data();
+                    const div = document.createElement('div');
+                    div.className = `msg ${data.sender === currentUser.username ? 'outgoing' : 'incoming'}`;
+                    div.innerText = data.text;
+                    msgBox.appendChild(div);
+                });
+                msgBox.scrollTop = msgBox.scrollHeight;
+            });
+        }
+
+        window.sendChatMsg = async function() {
+            const input = document.getElementById('chat-input-msg');
+            if(!input.value.trim() || !activeChatRecipient) return;
+            const chatRoomId = [currentUser.username, activeChatRecipient].sort().join("___vs___");
+            await addDoc(collection(db, "Chats"), {
+                roomId: chatRoomId, sender: currentUser.username, recipient: activeChatRecipient,
+                text: input.value.trim(), epoch: Date.now()
+            });
+            input.value = '';
+        }
+
+        // --- סטטיסטיקות ---
+        async function renderStatsView() {
+            if(currentUser.role === 'User') return;
+            const u = await getDocs(collection(db, "users"));
+            const b = await getDocs(collection(db, "books"));
+            document.getElementById('stats-grid').innerHTML = `
+                <div class="card"><h3>רשומים במערכת</h3><h1>${u.size}</h1></div>
+                <div class="card"><h3>ספרים במאגר</h3><h1>${b.size}</h1></div>
+            `;
+        }
+
+        // --- דיווחים ופניות ---
+        async function renderReportsView() {
+            if(currentUser.role === 'User') return;
+            const snap = await getDocs(query(collection(db, "Reports"), where("status", "==", "Open")));
+            const container = document.getElementById('reports-container');
+            container.innerHTML = '';
+
+            document.getElementById('toggle-accept-reports-btn').innerText = currentUser.receivingReports ? "🔌 כיבוי קבלת פניות" : "🔌 הפעלת קבלת פניות";
+
+            snap.forEach(d => {
+                const rep = d.data();
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                let actionButtons = '';
+                if(rep.type === 'BookSuggestion' && !['Admin+', 'SuperAdmin'].includes(currentUser.role)) {
+                    actionButtons = `<span style="color:var(--danger); font-size:12px;">ממתין לאדמין+ ומעלה</span>`;
+                } else {
+                    actionButtons = `<button class="btn btn-secondary" onclick="closeReport('${d.id}')">סגור פנייה וטפל</button>`;
+                }
+
+                card.innerHTML = `
+                    <div class="card-title">${rep.title}</div>
+                    <p>${rep.description || ''}</p>
+                    <div style="margin-top:10px;">${actionButtons}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.closeReport = async function(id) {
+            await updateDoc(doc(db, "Reports", id), { status: "Closed" });
+            renderReportsView();
+        }
+
+        window.toggleAcceptingReports = async function() {
+            const uRole = currentUser.role;
+            const targetState = !currentUser.receivingReports;
+            const allUsersSnap = await getDocs(collection(db, "users"));
+            
+            let countSameType = 0;
+            allUsersSnap.forEach(d => {
+                const u = d.data();
+                if(u.role === uRole && u.receivingReports === true && u.username !== currentUser.username) {
+                    countSameType++;
+                }
+            });
+
+            if(!targetState) {
+                if(uRole === 'Admin+' && countSameType < 1) {
+                    return alert("לא ניתן לכבות! חייב להיות לפחות אדמין+ רגיל אחד פעיל שמקבל פניות במערכת.");
+                }
+                if(uRole === 'SuperAdmin' && countSameType < 1) {
+                    return alert("לא ניתן לכבות! חייב להיות לפחות סופר אדמין אחד פעיל שמקבל פניות במערכת.");
+                }
+            }
+
+            await updateDoc(doc(db, "users", currentUser.username), { receivingReports: targetState });
+            currentUser.receivingReports = targetState;
+            alert(`מצב קבלת הפניות שלך שונה ל: ${targetState ? "פעיל" : "כבוי"}`);
+            renderReportsView();
+        }
+
+        // --- צוות ניהול ---
+        async function renderAdminsView() {
+            if(currentUser.role === 'User') return;
+            const snap = await getDocs(collection(db, "users"));
+            const tbody = document.getElementById('admins-table-body');
+            tbody.innerHTML = '';
+
+            snap.forEach(d => {
+                const user = d.data();
+                if(!['Admin', 'Admin+', 'SuperAdmin'].includes(user.role)) return;
+
+                const tr = document.createElement('tr');
+                let actions = '';
+
+                if(roleHierarchy[currentUser.role] > roleHierarchy[user.role]) {
+                    actions = `
+                        <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="deleteAdminAccount('${user.username}')">מחק חשבון</button>
+                    `;
+                } else {
+                    actions = `<span style="color:var(--text-muted); font-size:12px;">אין הרשאה (דרגה שווה/גבוהה)</span>`;
+                }
+
+                tr.innerHTML = `<td>${user.username}</td><td>${user.role}</td><td>${actions}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.createNewAdminAccount = async function() {
+            const user = document.getElementById('new-admin-username').value.trim();
+            const pass = document.getElementById('new-admin-password').value;
+            const role = document.getElementById('new-admin-role').value;
+
+            if(roleHierarchy[currentUser.role] <= roleHierarchy[role]) {
+                return alert("אין לך הרשאה ליצור חשבון מנהל בדרגה שווה או גבוהה משלך.");
+            }
+
+            const hash = await cryptoHash(pass, user);
+            await setDoc(doc(db, "users", user), {
+                username: user, passwordHash: hash, role: role,
+                joinedAt: new Date().toLocaleDateString('he-IL'), isSuspended: false, receivingReports: true
+            });
+            alert("חשבון המנהל נוצר.");
+            renderAdminsView();
+        }
+
+        window.deleteAdminAccount = async function(username) {
+            if(!confirm(`למחוק את חשבון המנהל ${username}?`)) return;
+            await deleteDoc(doc(db, "users", username));
+            renderAdminsView();
+        }
+
+        // --- יומן מערכת ---
+        async function renderSystemAuditLogsView() {
+            if(currentUser.role === 'User') return;
+            const q = query(collection(db, "ActivityLogs"), orderBy("epoch", "desc"));
+            const snap = await getDocs(q);
+            const container = document.getElementById('system-audit-logs');
+            container.innerHTML = '';
+
+            const uSnap = await getDocs(collection(db, "users"));
+            const userRolesMap = {};
+            uSnap.forEach(docBox => { userRolesMap[docBox.data().username] = docBox.data().role; });
+
+            snap.forEach(d => {
+                const log = d.data();
+                const operatorRole = userRolesMap[log.operator] || 'User';
+
+                if(currentUser.role === 'Admin') return; 
+                if(roleHierarchy[currentUser.role] <= roleHierarchy[operatorRole] && log.operator !== currentUser.username) return;
+
+                const li = document.createElement('li');
+                li.className = 'log-item';
+                li.innerHTML = `<strong>[${log.timestamp}]</strong> ${log.operator} (${operatorRole}): ${log.description}`;
+                container.appendChild(li);
+            });
+        }
+
+        initAppTheme();
+    </script>
+</body>
+</html>
